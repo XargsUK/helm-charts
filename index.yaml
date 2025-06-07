@@ -3,6 +3,26 @@ entries:
   via:
   - apiVersion: v2
     appVersion: 3.0.0
+    created: "2025-06-07T11:15:33.160361924Z"
+    description: VIA - A powerful, open-source web-based interface for configuring
+      your QMK-powered mechanical keyboard
+    digest: 03d281d6d90fa990478cb9e051cc7dea5c4dc1b55b3cc0e817e8c96b8699dc3b
+    home: https://github.com/the-via/app
+    keywords:
+    - keyboard
+    - qmk
+    - configuration
+    - mechanical-keyboard
+    - via
+    name: via
+    sources:
+    - https://github.com/the-via/app
+    type: application
+    urls:
+    - via-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
+    appVersion: 3.0.0
     created: "2025-06-07T11:11:10.231854551Z"
     description: VIA - A powerful, open-source web-based interface for configuring
       your QMK-powered mechanical keyboard
@@ -21,4 +41,4 @@ entries:
     urls:
     - via-1.0.0.tgz
     version: 1.0.0
-generated: "2025-06-07T11:11:10.231860773Z"
+generated: "2025-06-07T11:15:33.16037616Z"
