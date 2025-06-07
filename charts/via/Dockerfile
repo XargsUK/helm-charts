@@ -11,20 +11,11 @@ RUN apk add --no-cache git && \
 # Install dependencies (including via-keyboards from GitHub)
 RUN bun install --frozen-lockfile
 
-# Check what's available in node_modules/.bin
-RUN ls -la node_modules/.bin/ | grep -i via || echo "via-keyboards not found in .bin"
+# Refresh via-keyboards to ensure the binary is properly installed
+RUN bun run refresh-kbs
 
-# Create the public/definitions directory
-RUN mkdir -p public/definitions
-
-# Build keyboard definitions using bunx (which should find via-keyboards in node_modules)
-RUN bunx via-keyboards public/definitions || echo "via-keyboards command failed, continuing anyway"
-
-# Check what was created by via-keyboards
-RUN ls -la public/definitions/ || echo "No files in public/definitions"
-
-# Ensure hash.json exists (create minimal version if missing)
-RUN test -f public/definitions/hash.json || echo '"docker-build-hash"' > public/definitions/hash.json
+# Generate keyboard definitions using the via-keyboards command
+RUN bun run build:kbs
 
 # Build the TypeScript and Vite parts
 RUN bunx tsc && bunx vite build
