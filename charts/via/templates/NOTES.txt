@@ -1,0 +1,42 @@
+🎹 VIA - QMK Keyboard Configuration Tool has been deployed! 🎹
+
+{{- if .Values.ingress.enabled }}
+1. Access VIA at:
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  🌐 http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+
+{{- else if contains "NodePort" .Values.service.type }}
+1. Get the application URL by running these commands:
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "via.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo "🌐 VIA is available at: http://$NODE_IP:$NODE_PORT"
+
+{{- else if contains "LoadBalancer" .Values.service.type }}
+1. Get the application URL by running these commands:
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch its status by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "via.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "via.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo "🌐 VIA is available at: http://$SERVICE_IP:{{ .Values.service.port }}"
+
+{{- else if contains "ClusterIP" .Values.service.type }}
+1. Access VIA locally by running these commands:
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "via.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  echo "🌐 VIA is available at: http://127.0.0.1:8080"
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:80
+{{- end }}
+
+2. 🎯 Getting Started with VIA:
+   - Connect your QMK-compatible keyboard via USB
+   - VIA will automatically detect supported keyboards
+   - Use the interface to customize keymaps, create macros, and adjust RGB settings
+   - Changes are applied in real-time without needing to flash firmware
+
+3. 📚 Resources:
+   - VIA Documentation: https://github.com/the-via/app
+   - QMK Firmware: https://qmk.fm/
+   - Supported Keyboards: https://github.com/the-via/keyboards
+
+Happy keyboard customizing! ⌨️✨
