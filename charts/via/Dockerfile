@@ -1,24 +1,23 @@
 # Multi-stage build for VIA keyboard configuration tool
-FROM oven/bun:alpine AS builder
+FROM node:22 AS builder
 
 # Set working directory
 WORKDIR /app
 
+# Install system dependencies and bun
+RUN apt-get update && apt-get install -y jq xdg-utils git curl unzip && \
+    curl -fsSL https://bun.sh/install | bash && \
+    ln -s /root/.bun/bin/bun /usr/local/bin/bun && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Clone the VIA app repository
-RUN apk add --no-cache git && \
-    git clone https://github.com/the-via/app.git .
+RUN git clone https://github.com/the-via/app.git .
 
 # Install dependencies (including via-keyboards from GitHub)
-RUN bun install --frozen-lockfile
+RUN npm install
 
-# Refresh via-keyboards to ensure the binary is properly installed
-RUN bun run refresh-kbs
-
-# Generate keyboard definitions using the via-keyboards command
-RUN bun run build:kbs
-
-# Build the TypeScript and Vite parts
-RUN bunx tsc && bunx vite build
+# Build with azure script which handles refresh-kbs and build properly
+RUN npm run build:azure
 
 # Production stage
 FROM nginx:1.27.5-alpine
