@@ -101,8 +101,13 @@ spec:
             - name: FLYWAY_PASSWORD
               valueFrom:
                 secretKeyRef:
+                  {{- if .Values.global.postgresql.auth.existingSecret }}
+                  name: {{ .Values.global.postgresql.auth.existingSecret }}
+                  key: {{ .Values.global.postgresql.auth.secretKeys.adminPasswordKey | default "postgres-password" }}
+                  {{- else }}
                   name: {{ include "helicone.fullname" . }}-secrets
                   key: postgres-password
+                  {{- end }}
 {{- else }}
             - name: FLYWAY_URL
               value: "jdbc:postgresql://{{ .Values.aurora.host }}:{{ .Values.aurora.port }}/{{ .Values.aurora.database }}"
