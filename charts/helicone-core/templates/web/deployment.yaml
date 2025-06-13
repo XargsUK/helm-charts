@@ -1,0 +1,235 @@
+{{- if .Values.helicone.web.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "web.name" . }}
+  labels:
+    {{- include "helicone.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.helicone.web.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "helicone.web.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "helicone.web.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.beyla.enabled }}
+      # Required for Beyla sidecar to access the main container's processes
+      shareProcessNamespace: true
+      serviceAccountName: {{ include "helicone.fullname" . }}-beyla
+      {{- end }}
+      initContainers:
+{{- if .Values.postgresql.enabled }}
+        - name: wait-for-postgres
+          image: postgres:15-alpine
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for PostgreSQL to be ready..."
+              until pg_isready -h helicone-core-postgresql -p 5432 -U postgres; do
+                echo "PostgreSQL is not ready yet. Waiting..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready!"
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: helicone-secrets
+                  key: postgres-password
+{{- else }}
+        - name: wait-for-aurora
+          image: postgres:15-alpine
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Aurora PostgreSQL to be ready..."
+              until pg_isready -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER); do
+                echo "Aurora PostgreSQL is not ready yet. Waiting..."
+                sleep 2
+              done
+              echo "Aurora PostgreSQL is ready!"
+          env:
+{{ include "helicone.env.dbHost" . | indent 12 }}
+{{ include "helicone.env.dbPort" . | indent 12 }}
+{{ include "helicone.env.dbUser" . | indent 12 }}
+{{ include "helicone.env.dbPassword" . | indent 12 }}
+{{- end }}
+        {{- if .Values.helicone.minio.enabled }}
+        - name: wait-for-minio
+          image: minio/mc:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for MinIO to be ready..."
+              until mc alias set localminio http://{{ include "minio.name" . }}:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}; do
+                echo "MinIO is not ready yet. Waiting..."
+                sleep 2
+              done
+              echo "MinIO is ready!"
+        {{- end }}
+        - name: wait-for-clickhouse
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for ClickHouse to be ready..."
+              until curl -sSf http://{{ include "clickhouse.name" . }}:8123/ping; do
+                echo "ClickHouse is not ready yet. Waiting..."
+                sleep 2
+              done
+              echo "ClickHouse is ready!"
+        - name: postgres-migration-runner
+          image: "{{ .Values.helicone.web.postgresMigrationRunner.image.repository }}:{{ .Values.helicone.web.postgresMigrationRunner.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          {{- with .Values.helicone.web.postgresMigrationRunner.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+{{- if .Values.postgresql.enabled }}
+            - name: FLYWAY_URL
+              value: jdbc:postgresql://helicone-core-postgresql:5432/helicone_test
+            - name: FLYWAY_USER
+              value: postgres
+            - name: FLYWAY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: helicone-secrets
+                  key: postgres-password
+{{- else }}
+            - name: FLYWAY_URL
+              value: "jdbc:postgresql://{{ .Values.aurora.host }}:{{ .Values.aurora.port }}/{{ .Values.aurora.database }}"
+            - name: FLYWAY_USER
+              value: "{{ .Values.aurora.username }}"
+            - name: FLYWAY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aurora-postgres-credentials
+                  key: password
+{{- end }}
+      containers:
+        - name: web
+          image: "{{ .Values.helicone.web.image.repository }}:{{ .Values.helicone.web.image.tag }}"
+          imagePullPolicy: {{ .Values.helicone.web.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.helicone.web.service.port }}
+              protocol: TCP
+          env:
+            {{- include "helicone.web.env" . | nindent 12 }}
+            {{- include "helicone.web.clickhouseEnv" . | nindent 12 }}
+            {{- include "helicone.env.clickhouseHostDocker" . | nindent 12 }}
+            {{- include "helicone.env.clickhousePort" . | nindent 12 }}
+            {{- include "helicone.env.smtpHost" . | nindent 12 }}
+            {{- include "helicone.env.smtpPort" . | nindent 12 }}
+            {{- include "helicone.env.smtpSecure" . | nindent 12 }}
+            {{- include "helicone.env.nodeEnv" . | nindent 12 }}
+            {{- include "helicone.env.vercelEnv" . | nindent 12 }}
+            {{- include "helicone.env.nextPublicBetterAuth" . | nindent 12 }}
+            {{- include "helicone.env.s3ForcePathStyle" . | nindent 12 }}
+            {{- include "helicone.env.betterAuthSecret" . | nindent 12 }}
+            {{- include "helicone.env.betterAuthUrl" . | nindent 12 }}
+            {{- include "helicone.env.betterAuthTrustedOrigins" . | nindent 12 }}
+            {{- include "helicone.env.stripeSecretKey" . | nindent 12 }}
+            {{- with .Values.helicone.web.extraEnvVars }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.helicone.web.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            failureThreshold: 4
+        {{- if .Values.beyla.enabled }}
+        # Beyla sidecar container for eBPF auto-instrumentation
+        - name: beyla
+          image: "{{ .Values.beyla.image.repository }}:{{ .Values.beyla.image.tag }}"
+          imagePullPolicy: {{ .Values.beyla.image.pullPolicy }}
+          ports:
+            - name: beyla-metrics
+              containerPort: 9090
+              protocol: TCP
+          securityContext:
+            # Privileges are required to install the eBPF probes
+            {{- if .Values.beyla.securityContext.privileged }}
+            privileged: true
+            {{- else }}
+            runAsUser: 0
+            readOnlyRootFilesystem: true
+            capabilities:
+              add:
+                - BPF                 # Required for most eBPF probes to function correctly
+                - SYS_PTRACE          # Allows Beyla to access container namespaces and inspect executables
+                - NET_RAW             # Allows Beyla to use socket filters for HTTP requests
+                - CHECKPOINT_RESTORE  # Allows Beyla to open ELF files
+                - DAC_READ_SEARCH     # Allows Beyla to open ELF files
+                - PERFMON             # Allows Beyla to load BPF programs
+                {{- if .Values.beyla.securityContext.capabilities.sysAdmin }}
+                - SYS_ADMIN           # Required for Go application trace context propagation
+                {{- end }}
+              drop:
+                - ALL
+            {{- end }}
+          env:
+            # Configure Beyla to monitor the web service
+            - name: BEYLA_CONFIG_PATH
+              value: "/config/beyla-config.yml"
+            - name: BEYLA_KUBE_METADATA_ENABLE
+              value: "true"
+            {{- if .Values.beyla.otel.endpoint }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.beyla.otel.endpoint | quote }}
+            {{- end }}
+            {{- if .Values.beyla.otel.headers }}
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              value: {{ .Values.beyla.otel.headers | quote }}
+            {{- end }}
+            {{- if .Values.beyla.otel.protocol }}
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: {{ .Values.beyla.otel.protocol | quote }}
+            {{- end }}
+            - name: OTEL_SERVICE_NAME
+              value: "{{ include "web.name" . }}"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "service.namespace={{ .Release.Namespace }},service.instance.id={{ include "web.name" . }}"
+            {{- range $key, $value := .Values.beyla.extraEnvVars }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: beyla-config
+              mountPath: /config
+              readOnly: true
+            - name: var-run-beyla
+              mountPath: /var/run/beyla
+          resources:
+            {{- toYaml .Values.beyla.resources | nindent 12 }}
+        {{- end }}
+      {{- if .Values.beyla.enabled }}
+      volumes:
+        - name: beyla-config
+          configMap:
+            name: {{ include "helicone.fullname" . }}-beyla-config
+        - name: var-run-beyla
+          emptyDir: {}
+      {{- end }}
+{{- end }}
