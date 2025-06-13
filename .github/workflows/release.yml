@@ -34,21 +34,6 @@ jobs:
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
 
-      - name: Update dependencies for charts that need them
-        run: |
-          # Only update dependencies for charts that have them
-          for chart in charts/*/Chart.yaml; do
-            chart_dir=$(dirname "$chart")
-            if grep -q "^dependencies:" "$chart"; then
-              echo "Updating dependencies for $chart_dir"
-              cd "$chart_dir"
-              helm dependency update
-              cd - > /dev/null
-            else
-              echo "No dependencies found for $chart_dir, skipping"
-            fi
-          done
-
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         env:
