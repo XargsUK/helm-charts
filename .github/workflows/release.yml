@@ -41,17 +41,23 @@ jobs:
             echo "Updating dependencies for $chart_dir"
             cd "$chart_dir"
             if [ -f Chart.yaml ]; then
-              helm dependency update
-              # Extract .tgz dependencies to directories for chart-releaser
-              if [ -d charts ]; then
-                cd charts
-                for tgz in *.tgz; do
-                  if [ -f "$tgz" ]; then
-                    echo "Extracting $tgz"
-                    tar -xzf "$tgz"
-                  fi
-                done
-                cd ..
+              # Check if chart has dependencies
+              if grep -q "^dependencies:" Chart.yaml; then
+                echo "Chart has dependencies, updating..."
+                helm dependency update
+                # Extract .tgz dependencies to directories for chart-releaser
+                if [ -d charts ]; then
+                  cd charts
+                  for tgz in *.tgz; do
+                    if [ -f "$tgz" ]; then
+                      echo "Extracting $tgz"
+                      tar -xzf "$tgz"
+                    fi
+                  done
+                  cd ..
+                fi
+              else
+                echo "Chart has no dependencies, skipping dependency update"
               fi
             fi
             cd - > /dev/null
