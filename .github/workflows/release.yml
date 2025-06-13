@@ -42,6 +42,17 @@ jobs:
             cd "$chart_dir"
             if [ -f Chart.yaml ]; then
               helm dependency update
+              # Extract .tgz dependencies to directories for chart-releaser
+              if [ -d charts ]; then
+                cd charts
+                for tgz in *.tgz; do
+                  if [ -f "$tgz" ]; then
+                    echo "Extracting $tgz"
+                    tar -xzf "$tgz"
+                  fi
+                done
+                cd ..
+              fi
             fi
             cd - > /dev/null
           done
