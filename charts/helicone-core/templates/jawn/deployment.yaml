@@ -38,7 +38,7 @@ spec:
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: helicone-secrets
+                  name: {{ include "helicone.fullname" . }}-secrets
                   key: postgres-password
 {{- else }}
         - name: wait-for-aurora

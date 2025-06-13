@@ -66,7 +66,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
 - name: CLICKHOUSE_USER
   valueFrom:
     secretKeyRef:
-      name: {{ include "clickhouse.name" . }}-secrets
+      name: {{ include "helicone.fullname" . }}-secrets
       key: user
 {{- end -}}
 
@@ -76,32 +76,18 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
 
 {{- define "helicone.env.s3AccessKey" -}}
 - name: S3_ACCESS_KEY
-{{- if eq .Values.helicone.minio.enabled true }}
   valueFrom:
     secretKeyRef:
-      name: helicone-minio-secrets
-      key: root_user
-{{- else }}
-  valueFrom:
-    secretKeyRef:
-      name: helicone-secrets
+      name: {{ include "helicone.fullname" . }}-secrets
       key: access_key
-{{- end }}
 {{- end -}}
 
 {{- define "helicone.env.s3SecretKey" -}}
 - name: S3_SECRET_KEY
-{{- if eq .Values.helicone.minio.enabled true }}
   valueFrom:
     secretKeyRef:
-      name: helicone-minio-secrets
-      key: root_password
-{{- else }}
-  valueFrom:
-    secretKeyRef:
-      name: helicone-secrets
+      name: {{ include "helicone.fullname" . }}-secrets
       key: secret_key
-{{- end }}
 {{- end -}}
 
 {{- define "helicone.env.s3Endpoint" -}}
@@ -111,7 +97,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
 {{- else }}
   valueFrom:
     secretKeyRef:
-      name: helicone-secrets
+      name: {{ include "helicone.fullname" . }}-secrets
       key: endpoint
 {{- end }}
 {{- end -}}
@@ -123,7 +109,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
 {{- else }}
   valueFrom:
     secretKeyRef:
-      name: helicone-secrets
+      name: {{ include "helicone.fullname" . }}-secrets
       key: bucket_name
 {{- end }}
 {{- end -}}
@@ -199,7 +185,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
       name: aurora-postgres-credentials
       key: password
 {{- else }}
-      name: helicone-secrets
+      name: {{ include "helicone.fullname" . }}-secrets
       key: postgres-password
 {{- end }}
 {{- end -}}
@@ -240,7 +226,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
 - name: BETTER_AUTH_SECRET
   valueFrom:
     secretKeyRef:
-      name: helicone-web-secrets
+      name: {{ include "helicone.fullname" . }}-secrets
       key: BETTER_AUTH_SECRET
 {{- end }}
 
@@ -248,7 +234,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
 - name: STRIPE_SECRET_KEY
   valueFrom:
     secretKeyRef:
-      name: helicone-web-secrets
+      name: {{ include "helicone.fullname" . }}-secrets
       key: STRIPE_SECRET_KEY
 {{- end }}
 

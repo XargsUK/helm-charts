@@ -38,7 +38,7 @@ spec:
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: helicone-secrets
+                  name: {{ include "helicone.fullname" . }}-secrets
                   key: postgres-password
 {{- else }}
         - name: wait-for-aurora
@@ -95,13 +95,13 @@ spec:
           env:
 {{- if .Values.postgresql.enabled }}
             - name: FLYWAY_URL
-              value: jdbc:postgresql://helicone-core-postgresql:5432/helicone_test
+              value: jdbc:postgresql://helicone-core-postgresql:5432/helicone
             - name: FLYWAY_USER
               value: postgres
             - name: FLYWAY_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: helicone-secrets
+                  name: {{ include "helicone.fullname" . }}-secrets
                   key: postgres-password
 {{- else }}
             - name: FLYWAY_URL
