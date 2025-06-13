@@ -1,0 +1,32 @@
+{{- if and .Values.mailhog.enabled .Values.mailhog.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "helicone.fullname" . }}-mailhog
+  labels:
+    {{- include "helicone.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mailhog
+  {{- with .Values.mailhog.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.mailhog.ingress.className }}
+  ingressClassName: {{ .Values.mailhog.ingress.className }}
+  {{- end }}
+  rules:
+    {{- range .Values.mailhog.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ include "helicone.fullname" $ }}-mailhog
+                port:
+                  number: {{ .backend.service.port.number }}
+          {{- end }}
+    {{- end }}
+{{- end }}

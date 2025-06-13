@@ -29,11 +29,17 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 - name: DB_DRIVER
   value: "postgres"
 - name: DB_SSL
+{{- if .Values.postgresql.enabled }}
   value: "disable"
+{{- else }}
+  value: "require"
+{{- end }}
 - name: DATABASE_URL
   value: "postgresql://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(DB_SSL)&options=-c%20search_path%3Dpublic,extensions"
 - name: NEXT_PUBLIC_IS_ON_PREM
   value: "true"
+- name: NEXT_PUBLIC_SITE_URL
+  value: {{ .Values.helicone.config.siteUrl | quote }}
 {{- end }}
 
 {{- define "helicone.web.clickhouseEnv" }}

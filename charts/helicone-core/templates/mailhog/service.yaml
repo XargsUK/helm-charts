@@ -7,14 +7,17 @@ metadata:
     {{- include "helicone.labels" . | nindent 4 }}
     app.kubernetes.io/component: mailhog
 spec:
+  type: {{ .Values.mailhog.service.type | default "ClusterIP" }}
   ports:
-    - port: 1025
-      targetPort: 1025
-      name: smtp
-    - port: 8025
+    - port: {{ .Values.mailhog.service.port | default 8025 }}
       targetPort: 8025
-      name: web
+      protocol: TCP
+      name: http
+    - port: {{ .Values.mailhog.service.smtpPort | default 1025 }}
+      targetPort: 1025
+      protocol: TCP
+      name: smtp
   selector:
     {{- include "helicone.selectorLabels" . | nindent 4 }}
-    app.kubernetes.io/component: mailhog 
+    app.kubernetes.io/component: mailhog
 {{- end }}

@@ -14,6 +14,21 @@ You can then run `helm search repo <alias>` to see the charts.
 
 ## Available Charts
 
+### Helicone Core - LLM Observability Platform
+
+Helicone Core is a comprehensive LLM observability and monitoring platform that includes web interface, API gateway (Jawn), ClickHouse for analytics, MinIO for storage, and PostgreSQL database.
+
+This chart has been adapted to run on both local development and production MicroK8s clusters, in addition to AWS environments.
+
+To install the VIA chart:
+
+  `helm install helicone <alias>/helicone --set image.repository=your-registry/helicone`
+
+To uninstall the chart:
+
+  `helm delete helicone`
+
+
 ### VIA - QMK Keyboard Configuration Tool
 
 VIA is a powerful, open-source web-based interface for configuring your QMK-powered mechanical keyboard.

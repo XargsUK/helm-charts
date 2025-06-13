@@ -1,0 +1,293 @@
+################################################################################
+#
+#                     HELICONE CORE - MICROK8S CONFIGURATION
+#
+################################################################################
+global:
+  # Use local PostgreSQL instead of Aurora
+  postgresql:
+    auth:
+      database: helicone
+      username: helicone_admin
+      postgresPassword: "helicone-dev-password"
+      password: "helicone-dev-password"
+
+postgresql:
+  # Enable the PostgreSQL container for microk8s
+  enabled: true
+  auth:
+    database: helicone
+    username: helicone_admin
+    postgresPassword: "helicone-dev-password"
+    password: "helicone-dev-password"
+  primary:
+    persistence:
+      enabled: true
+      storageClass: "microk8s-hostpath"
+      size: 8Gi
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+# Disable Aurora configuration for microk8s
+aurora:
+  enabled: false
+
+helicone:
+  web:
+    enabled: true
+    image:
+      # Use public Docker Hub images instead of AWS ECR
+      repository: helicone/web
+      pullPolicy: IfNotPresent
+      tag: "latest"
+    replicaCount: 1
+    service:
+      annotations: {}
+      type: ClusterIP
+      port: 3000
+    extraEnvVars: []
+    ingress:
+      enabled: true
+      className: "public"  # microk8s ingress class
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+      hosts:
+        - host: helicone.local
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: helicone-web
+                  port:
+                    number: 3000
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+    verticalPodAutoscaler:
+      enabled: false
+    podDisruptionBudget:
+      enabled: false  # Disable for single-node microk8s
+    autoscaling:
+      enabled: false  # Disable HPA for microk8s
+      minReplicas: 1
+      maxReplicas: 3
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    postgresMigrationRunner:
+      image:
+        repository: helicone/migrations
+        pullPolicy: IfNotPresent
+        tag: "latest"
+      resources:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 200m
+
+  clickhouse:
+    enabled: true
+    image:
+      repository: clickhouse/clickhouse-server
+      pullPolicy: IfNotPresent
+      tag: "23.4.2.11"
+    replicaCount: 1
+    service:
+      annotations: {}
+      type: ClusterIP
+      port: 8123
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 250m
+      limits:
+        memory: 2Gi
+        cpu: 1000m
+    persistence:
+      storageClass: "microk8s-hostpath"  # microk8s storage class
+      size: 10Gi
+
+  minio:
+    enabled: true
+    image:
+      repository: minio/minio
+      pullPolicy: IfNotPresent
+      tag: "RELEASE.2023-05-18T00-05-36Z"
+    replicaCount: 1
+    service:
+      annotations: {}
+      type: ClusterIP
+      port: 9000
+      consolePort: 9001
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+    persistence:
+      storageClass: "microk8s-hostpath"  # microk8s storage class
+      size: 20Gi
+    ingress:
+      enabled: true
+      ingressClassName: "public"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+      hosts:
+        - host: minio.local
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: helicone-minio
+                  port:
+                    number: 9001
+    setup:
+      image:
+        repository: minio/mc
+        tag: "latest"
+        pullPolicy: IfNotPresent
+      buckets:
+        - "request-response-storage"
+
+  jawn:
+    enabled: true
+    image:
+      repository: helicone/jawn
+      pullPolicy: IfNotPresent
+      tag: "latest"
+    replicaCount: 1
+    service:
+      annotations: {}
+      type: ClusterIP
+      port: 8585
+    extraEnvVars: []
+    publicUrl: "http://helicone.local/jawn"
+    ingress:
+      enabled: true
+      className: "public"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /$2
+        nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+      hosts:
+        - host: helicone.local
+          paths:
+            - path: /jawn(/|$)(.*)
+              pathType: ImplementationSpecific
+              backend:
+                service:
+                  name: helicone-jawn
+                  port:
+                    number: 8585
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 512Mi
+    autoscaling:
+      enabled: false  # Disable HPA for microk8s
+      minReplicas: 1
+      maxReplicas: 3
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+
+  config:
+    vercelEnv: "development"
+    clickhouseHost: "helicone-core-clickhouse"
+    clickhousePort: "8123"
+    clickhouseUser: "default"
+    s3BucketName: "request-response-storage"
+    s3Endpoint: "http://helicone-core-minio:9000"  # Local MinIO endpoint
+    openaiProxyPort: "8787"
+    heliconeApiPort: "8788"
+    anthropicProxyPort: "8789"
+    gatewayApiPort: "8790"
+    jawnPort: "8585"
+    jawnPublicUrl: "http://helicone.local/jawn"
+    kongHttpPort: "8000"
+    kongHttpsPort: "8443"
+    pgrstDbSchemas: "public,storage,graphql_public"
+    siteUrl: "http://helicone.local"
+    additionalRedirectUrls: ""
+    jwtExpiry: "3600"
+    disableSignup: "false"
+    apiExternalUrl: "http://localhost:8000"
+    mailerUrlpathsConfirmation: "/auth/v1/verify"
+    mailerUrlpathsInvite: "/auth/v1/verify"
+    mailerUrlpathsRecovery: "/auth/v1/verify"
+    mailerUrlpathsEmailChange: "/auth/v1/verify"
+    enableEmailSignup: "true"
+    enableEmailAutoconfirm: "false"
+    enablePhoneSignup: "true"
+    enablePhoneAutoconfirm: "true"
+    studioDefaultOrganization: "Default Organization"
+    studioDefaultProject: "Default Project"
+    studioPort: "3000"
+    imgproxyEnableWebpDetection: "true"
+    functionsVerifyJwt: "false"
+    dockerSocketLocation: "/var/run/docker.sock"
+    googleProjectId: "GOOGLE_PROJECT_ID"
+    googleProjectNumber: "GOOGLE_PROJECT_NUMBER"
+    nodeEnv: "development"
+
+  secrets:
+    # Development secrets for microk8s
+    betterAuthSecret: "dev-better-auth-secret-key-32-chars"
+    stripeSecretKey: "sk_test_dev_stripe_key"
+    minioRootUser: "minioadmin"
+    minioRootPassword: "minioadmin123"
+    user: "default"
+    s3AccessKey: "minioadmin"
+    s3SecretKey: "minioadmin123"
+    grafanaAdminPassword: "admin123"
+
+mailhog:
+  enabled: true
+  image:
+    repository: mailhog/mailhog
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8025
+    smtpPort: 1025
+  ingress:
+    enabled: true
+    className: "public"
+    annotations: {}
+    hosts:
+      - host: mailhog.local
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: helicone-mailhog
+                port:
+                  number: 8025
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+# Beyla configuration (disabled for microk8s)
+beyla:
+  enabled: false

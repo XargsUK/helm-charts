@@ -130,17 +130,19 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
 
 
 {{/* ------------------------------------------------------------------ */}}
-{{/* PostgreSQL connection helpers - Updated for Aurora                */}}
+{{/* PostgreSQL connection helpers - Support both local and Aurora     */}}
 {{/* ------------------------------------------------------------------ */}}
 {{- define "helicone.env.dbHost" -}}
 - name: DB_HOST
 {{- if .Values.postgresql.enabled }}
   value: {{ printf "%s-postgresql" .Release.Name | quote }}
-{{- else }}
+{{- else if .Values.aurora.enabled }}
   valueFrom:
     secretKeyRef:
       name: aurora-postgres-credentials
       key: host
+{{- else }}
+  value: {{ .Values.aurora.host | quote }}
 {{- end }}
 {{- end -}}
 
@@ -148,11 +150,13 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
 - name: DB_PORT
 {{- if .Values.postgresql.enabled }}
   value: "5432"
-{{- else }}
+{{- else if .Values.aurora.enabled }}
   valueFrom:
     secretKeyRef:
       name: aurora-postgres-credentials
       key: port
+{{- else }}
+  value: {{ .Values.aurora.port | quote }}
 {{- end }}
 {{- end -}}
 
@@ -160,11 +164,13 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
 - name: DB_NAME
 {{- if .Values.postgresql.enabled }}
   value: {{ .Values.global.postgresql.auth.database | quote }}
-{{- else }}
+{{- else if .Values.aurora.enabled }}
   valueFrom:
     secretKeyRef:
       name: aurora-postgres-credentials
       key: database
+{{- else }}
+  value: {{ .Values.aurora.database | quote }}
 {{- end }}
 {{- end -}}
 
@@ -172,11 +178,13 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
 - name: DB_USER
 {{- if .Values.postgresql.enabled }}
   value: {{ .Values.global.postgresql.auth.username | quote }}
-{{- else }}
+{{- else if .Values.aurora.enabled }}
   valueFrom:
     secretKeyRef:
       name: aurora-postgres-credentials
       key: username
+{{- else }}
+  value: {{ .Values.aurora.username | quote }}
 {{- end }}
 {{- end -}}
 
@@ -185,11 +193,14 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
   valueFrom:
     secretKeyRef:
 {{- if .Values.postgresql.enabled }}
-      name: helicone-secrets
+      name: {{ printf "%s-postgresql" .Release.Name | quote }}
       key: postgres-password
-{{- else }}
+{{- else if .Values.aurora.enabled }}
       name: aurora-postgres-credentials
       key: password
+{{- else }}
+      name: helicone-secrets
+      key: postgres-password
 {{- end }}
 {{- end -}}
 
@@ -222,7 +233,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
 
 {{- define "helicone.env.betterAuthTrustedOrigins" -}}
 - name: BETTER_AUTH_TRUSTED_ORIGINS
-  value: "https://heliconetest.com,http://heliconetest.com"
+  value: "{{ .Values.helicone.config.siteUrl }},{{ .Values.helicone.config.siteUrl | replace "https://" "http://" }}"
 {{- end }}
 
 {{- define "helicone.env.betterAuthSecret" -}}
@@ -343,5 +354,5 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
 
 {{- define "helicone.env.betterAuthUrl" -}}
 - name: BETTER_AUTH_URL
-  value: "https://heliconetest.com"
+  value: {{ .Values.helicone.config.siteUrl | quote }}
 {{- end }}
