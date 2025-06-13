@@ -23,10 +23,6 @@
 .vscode/
 # OS generated files
 Thumbs.db
-# Helm build files
-*.tgz
-charts/*.tgz
-charts/*/
 # Documentation and examples
 README.md
 README.microk8s.md
