@@ -7,10 +7,11 @@ on:
     paths:
       - 'charts/**'
 
+permissions:
+  contents: write
+
 jobs:
   release:
-    permissions:
-      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,10 +24,29 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Add Helm repositories
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo update
+
+      - name: Update chart dependencies
+        run: |
+          for chart in charts/*/Chart.yaml; do
+            chart_dir=$(dirname "$chart")
+            echo "Updating dependencies for $chart_dir"
+            cd "$chart_dir"
+            if [ -f Chart.yaml ]; then
+              helm dependency update
+            fi
+            cd - > /dev/null
+          done
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
-        with:
-          pages_branch: gh-pages
-          packages_with_index: true
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
