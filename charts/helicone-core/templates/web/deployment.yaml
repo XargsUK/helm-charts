@@ -119,6 +119,72 @@ spec:
                   name: aurora-postgres-credentials
                   key: password
 {{- end }}
+{{- if .Values.postgresql.enabled }}
+        - name: postgres-permissions-setup
+          image: postgres:15-alpine
+          command:
+            - sh
+            - -c
+            - |
+              echo "Setting up database permissions for helicone_admin user..."
+              export PGPASSWORD="${POSTGRES_PASSWORD}"
+              
+              # Grant permissions to helicone_admin user
+              psql -h helicone-core-postgresql -p 5432 -U postgres -d helicone -c "
+                GRANT ALL PRIVILEGES ON DATABASE helicone TO helicone_admin;
+                GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO helicone_admin;
+                GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO helicone_admin;
+                GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO helicone_admin;
+                ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO helicone_admin;
+                ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO helicone_admin;
+                ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO helicone_admin;
+              "
+              echo "Database permissions setup completed!"
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.global.postgresql.auth.existingSecret }}
+                  name: {{ .Values.global.postgresql.auth.existingSecret }}
+                  key: {{ .Values.global.postgresql.auth.secretKeys.adminPasswordKey | default "postgres-password" }}
+                  {{- else }}
+                  name: {{ include "helicone.fullname" . }}-secrets
+                  key: postgres-password
+                  {{- end }}
+{{- else }}
+        - name: postgres-permissions-setup
+          image: postgres:15-alpine
+          command:
+            - sh
+            - -c
+            - |
+              echo "Setting up database permissions for helicone_admin user..."
+              export PGPASSWORD="${POSTGRES_PASSWORD}"
+              
+              # Grant permissions to helicone_admin user
+              psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d ${DB_NAME} -c "
+                GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO helicone_admin;
+                GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO helicone_admin;
+                GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO helicone_admin;
+                GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO helicone_admin;
+                ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO helicone_admin;
+                ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO helicone_admin;
+                ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO helicone_admin;
+              "
+              echo "Database permissions setup completed!"
+          env:
+{{ include "helicone.env.dbHost" . | indent 12 }}
+{{ include "helicone.env.dbPort" . | indent 12 }}
+            - name: DB_USER
+              value: "{{ .Values.aurora.username }}"
+            - name: DB_NAME
+              value: "{{ .Values.aurora.database }}"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aurora-postgres-credentials
+                  key: password
+{{- end }}
       containers:
         - name: web
           image: "{{ .Values.helicone.web.image.repository }}:{{ .Values.helicone.web.image.tag }}"

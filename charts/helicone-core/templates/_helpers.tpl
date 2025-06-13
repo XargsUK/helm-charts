@@ -179,8 +179,13 @@ app.kubernetes.io/managed-by: {{ .Release.Service }} {{- end }}
   valueFrom:
     secretKeyRef:
 {{- if .Values.postgresql.enabled }}
+  {{- if .Values.global.postgresql.auth.existingSecret }}
+      name: {{ .Values.global.postgresql.auth.existingSecret }}
+      key: {{ .Values.global.postgresql.auth.secretKeys.adminPasswordKey | default "password" }}
+  {{- else }}
       name: {{ printf "%s-postgresql" .Release.Name | quote }}
-      key: postgres-password
+      key: password
+  {{- end }}
 {{- else if .Values.aurora.enabled }}
       name: aurora-postgres-credentials
       key: password
