@@ -29,39 +29,27 @@ jobs:
         with:
           version: v3.14.0
 
-      - name: Add Helm repositories
+      - name: Add Helm dependency repos
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
 
-      - name: Update chart dependencies and package
+      - name: Update dependencies for charts that need them
         run: |
-          mkdir -p .cr-release-packages
-          
+          # Only update dependencies for charts that have them
           for chart in charts/*/Chart.yaml; do
             chart_dir=$(dirname "$chart")
-            echo "Processing chart: $chart_dir"
-            
-            # Check if chart has dependencies
             if grep -q "^dependencies:" "$chart"; then
-              echo "Chart has dependencies, updating..."
+              echo "Updating dependencies for $chart_dir"
               cd "$chart_dir"
               helm dependency update
-              echo "Dependencies updated, packaging chart..."
-              helm package . --destination ../../.cr-release-packages/
               cd - > /dev/null
             else
-              echo "Chart has no dependencies, packaging directly..."
-              helm package "$chart_dir" --destination .cr-release-packages/
+              echo "No dependencies found for $chart_dir, skipping"
             fi
           done
-          
-          echo "Packaged charts:"
-          ls -la .cr-release-packages/
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
-        with:
-          skip_packaging: true
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
