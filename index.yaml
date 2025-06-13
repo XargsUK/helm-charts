@@ -1,6 +1,53 @@
 apiVersion: v1
 entries:
+  helicone-core:
+  - apiVersion: v2
+    appVersion: 2025.05.23
+    created: "2025-06-13T15:13:46.052753923Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 15.5.20
+    description: Helicone Core Application - Web, Jawn, ClickHouse, MinIO, PostgreSQL
+    digest: ca7dce4340011fd27a33512dabe8176cc00fac79e31a3cc101803cf5e48dfb14
+    home: https://helicone.ai
+    keywords:
+    - helicone
+    - llm
+    - monitoring
+    - observability
+    maintainers:
+    - email: engineering@helicone.ai
+      name: Helicone Team
+    name: helicone-core
+    sources:
+    - https://github.com/Helicone/helicone
+    type: application
+    urls:
+    - https://github.com/XargsUK/helm-charts/releases/download/helicone-core-0.1.1/helicone-core-0.1.1.tgz
+    version: 0.1.1
   via:
+  - apiVersion: v2
+    appVersion: 3.0.0
+    created: "2025-06-13T15:13:46.202173992Z"
+    description: VIA - A powerful, open-source web-based interface for configuring
+      your QMK-powered mechanical keyboard
+    digest: 07392bf7cb9f96784049ba9255a1ec649b5493f0f293f1714e95d9c04ea8f997
+    home: https://github.com/the-via/app
+    keywords:
+    - keyboard
+    - qmk
+    - configuration
+    - mechanical-keyboard
+    - via
+    name: via
+    sources:
+    - https://github.com/the-via/app
+    type: application
+    urls:
+    - https://github.com/XargsUK/helm-charts/releases/download/via-1.0.3/via-1.0.3.tgz
+    version: 1.0.3
   - apiVersion: v2
     appVersion: 3.0.0
     created: "2025-06-07T11:18:40.657006744Z"
@@ -61,4 +108,4 @@ entries:
     urls:
     - via-1.0.0.tgz
     version: 1.0.0
-generated: "2025-06-07T11:18:40.657017694Z"
+generated: "2025-06-13T15:13:46.202198057Z"
