@@ -34,48 +34,34 @@ jobs:
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
 
-      - name: Update chart dependencies
+      - name: Update chart dependencies and package
         run: |
+          mkdir -p .cr-release-packages
+          
           for chart in charts/*/Chart.yaml; do
             chart_dir=$(dirname "$chart")
-            echo "Updating dependencies for $chart_dir"
+            echo "Processing chart: $chart_dir"
             
             # Check if chart has dependencies
             if grep -q "^dependencies:" "$chart"; then
               echo "Chart has dependencies, updating..."
               cd "$chart_dir"
               helm dependency update
-              # Extract .tgz dependencies to directories for chart-releaser
-              if [ -d charts ]; then
-                echo "Charts directory exists, extracting dependencies..."
-                cd charts
-                ls -la
-                for tgz in *.tgz; do
-                  if [ -f "$tgz" ]; then
-                    echo "Extracting $tgz"
-                    tar -xzf "$tgz"
-                    echo "Extraction complete, listing contents:"
-                    ls -la
-                  fi
-                done
-                cd ..
-              else
-                echo "No charts directory found"
-              fi
-              echo "Final chart directory contents:"
-              ls -la
+              echo "Dependencies updated, packaging chart..."
+              helm package . --destination ../../.cr-release-packages/
               cd - > /dev/null
             else
-              echo "Chart has no dependencies, skipping dependency update"
+              echo "Chart has no dependencies, packaging directly..."
+              helm package "$chart_dir" --destination .cr-release-packages/
             fi
           done
-
-      - name: Verify extracted dependencies
-        run: |
-          echo "Checking all chart directories for extracted dependencies:"
-          find charts/ -type d -name "postgresql" -exec ls -la {} \; || echo "No postgresql directories found"
+          
+          echo "Packaged charts:"
+          ls -la .cr-release-packages/
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
+        with:
+          skip_packaging: true
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
