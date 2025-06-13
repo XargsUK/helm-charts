@@ -25,12 +25,12 @@ spec:
             - name: MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
-                  name: helicone-minio-secrets
+                  name: {{ include "helicone.fullname" . }}-secrets
                   key: root_user
             - name: MINIO_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: helicone-minio-secrets
+                  name: {{ include "helicone.fullname" . }}-secrets
                   key: root_password
           command:
             - /bin/sh
