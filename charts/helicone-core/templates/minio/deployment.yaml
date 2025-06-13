@@ -25,6 +25,16 @@ spec:
           args:
             - minio server /data --console-address :9001
           env:
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: helicone-minio-secrets
+                  key: root_user
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: helicone-minio-secrets
+                  key: root_password
             {{- with .Values.helicone.minio.extraEnvVars }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
