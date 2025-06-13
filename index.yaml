@@ -3,6 +3,32 @@ entries:
   helicone-core:
   - apiVersion: v2
     appVersion: 2025.05.23
+    created: "2025-06-13T17:33:40.066448217Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 15.5.20
+    description: Helicone Core Application - Web, Jawn, ClickHouse, MinIO, PostgreSQL
+    digest: 0878d6daf615193de304b639f33e13d04976d676dfdd581ba9847ea0b006d8e1
+    home: https://helicone.ai
+    keywords:
+    - helicone
+    - llm
+    - monitoring
+    - observability
+    maintainers:
+    - email: engineering@helicone.ai
+      name: Helicone Team
+    name: helicone-core
+    sources:
+    - https://github.com/Helicone/helicone
+    type: application
+    urls:
+    - https://github.com/XargsUK/helm-charts/releases/download/helicone-core-0.1.5/helicone-core-0.1.5.tgz
+    version: 0.1.5
+  - apiVersion: v2
+    appVersion: 2025.05.23
     created: "2025-06-13T17:27:54.838701093Z"
     dependencies:
     - condition: postgresql.enabled
@@ -186,4 +212,4 @@ entries:
     urls:
     - via-1.0.0.tgz
     version: 1.0.0
-generated: "2025-06-13T17:27:54.838733874Z"
+generated: "2025-06-13T17:33:40.066468906Z"
