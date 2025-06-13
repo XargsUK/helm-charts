@@ -1,0 +1,185 @@
+{{- if .Values.helicone.jawn.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "jawn.name" . }}
+  labels:
+    {{- include "helicone.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.helicone.jawn.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "helicone.jawn.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "helicone.jawn.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.beyla.enabled }}
+      # Required for Beyla sidecar to access the main container's processes
+      shareProcessNamespace: true
+      serviceAccountName: {{ include "helicone.fullname" . }}-beyla
+      {{- end }}
+      initContainers:
+{{- if .Values.postgresql.enabled }}
+        - name: wait-for-postgres
+          image: postgres:15-alpine
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for PostgreSQL to be ready..."
+              until pg_isready -h helicone-core-postgresql -p 5432 -U postgres; do
+                echo "PostgreSQL is not ready yet. Waiting..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready!"
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: helicone-secrets
+                  key: postgres-password
+{{- else }}
+        - name: wait-for-aurora
+          image: postgres:15-alpine
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Aurora PostgreSQL to be ready..."
+              until pg_isready -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER); do
+                echo "Aurora PostgreSQL is not ready yet. Waiting..."
+                sleep 2
+              done
+              echo "Aurora PostgreSQL is ready!"
+          env:
+{{ include "helicone.env.dbHost" . | indent 12 }}
+{{ include "helicone.env.dbPort" . | indent 12 }}
+{{ include "helicone.env.dbUser" . | indent 12 }}
+{{ include "helicone.env.dbPassword" . | indent 12 }}
+{{- end }}
+      containers:
+        - name: {{ include "jawn.name" $ }}
+          image: "{{ .Values.helicone.jawn.image.repository }}:{{ .Values.helicone.jawn.image.tag }}"
+          imagePullPolicy: {{ .Values.helicone.jawn.image.pullPolicy }}
+          env:
+            {{- include "helicone.env.clickhouseHost" . | nindent 12 }}
+            {{- include "helicone.env.clickhouseUser" . | nindent 12 }}
+            {{- include "helicone.env.dbHost" . | nindent 12 }}
+            {{- include "helicone.env.dbPort" . | nindent 12 }}
+            {{- include "helicone.env.dbUser" . | nindent 12 }}
+            {{- include "helicone.env.dbPassword" . | nindent 12 }}
+            {{- include "helicone.env.dbName" . | nindent 12 }}
+            {{- include "helicone.env.s3AccessKey" . | nindent 12 }}
+            {{- include "helicone.env.s3SecretKey" . | nindent 12 }}
+            {{- include "helicone.env.s3BucketName" . | nindent 12 }}
+            {{- include "helicone.env.s3Endpoint" . | nindent 12 }}
+            {{- include "helicone.env.betterAuthSecret" . | nindent 12 }}
+            {{- include "helicone.env.betterAuthUrl" . | nindent 12 }}
+            {{- include "helicone.env.betterAuthTrustedOrigins" . | nindent 12 }}
+            {{- include "helicone.env.stripeSecretKey" . | nindent 12 }}
+            {{- include "helicone.env.azureApiKey" . | nindent 12 }}
+            {{- include "helicone.env.azureApiVersion" . | nindent 12 }}
+            {{- include "helicone.env.azureDeploymentName" . | nindent 12 }}
+            {{- include "helicone.env.azureBaseUrl" . | nindent 12 }}
+            {{- include "helicone.env.openaiApiKey" . | nindent 12 }}
+            {{- include "helicone.env.enablePromptSecurity" . | nindent 12 }}
+            {{- include "helicone.env.supabaseUrl" . | nindent 12 }}
+            {{- include "helicone.env.supabaseDatabaseUrl" . | nindent 12 }}
+            {{- include "helicone.env.enableCronJob" . | nindent 12 }}
+            {{- include "helicone.env.databaseUrl" . | nindent 12 }}
+            {{- include "helicone.env.env" . | nindent 12 }}
+            {{- include "helicone.env.nextPublicBetterAuth" . | nindent 12 }}
+            {{- with .Values.helicone.jawn.extraEnvVars }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.helicone.jawn.service.port }}
+              protocol: TCP
+          {{- with .Values.helicone.jawn.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 4
+        {{- if .Values.beyla.enabled }}
+        # Beyla sidecar container for eBPF auto-instrumentation
+        - name: beyla
+          image: "{{ .Values.beyla.image.repository }}:{{ .Values.beyla.image.tag }}"
+          imagePullPolicy: {{ .Values.beyla.image.pullPolicy }}
+          ports:
+            - name: beyla-metrics
+              containerPort: 9090
+              protocol: TCP
+          securityContext:
+            # Privileges are required to install the eBPF probes
+            {{- if .Values.beyla.securityContext.privileged }}
+            privileged: true
+            {{- else }}
+            runAsUser: 0
+            readOnlyRootFilesystem: true
+            capabilities:
+              add:
+                - BPF                 # Required for most eBPF probes to function correctly
+                - SYS_PTRACE          # Allows Beyla to access container namespaces and inspect executables
+                - NET_RAW             # Allows Beyla to use socket filters for HTTP requests
+                - CHECKPOINT_RESTORE  # Allows Beyla to open ELF files
+                - DAC_READ_SEARCH     # Allows Beyla to open ELF files
+                - PERFMON             # Allows Beyla to load BPF programs
+                {{- if .Values.beyla.securityContext.capabilities.sysAdmin }}
+                - SYS_ADMIN           # Required for Go application trace context propagation
+                {{- end }}
+              drop:
+                - ALL
+            {{- end }}
+          env:
+            # Configure Beyla to monitor the jawn service
+            - name: BEYLA_CONFIG_PATH
+              value: "/config/beyla-config.yml"
+            - name: BEYLA_KUBE_METADATA_ENABLE
+              value: "true"
+            {{- if .Values.beyla.otel.endpoint }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.beyla.otel.endpoint | quote }}
+            {{- end }}
+            {{- if .Values.beyla.otel.headers }}
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              value: {{ .Values.beyla.otel.headers | quote }}
+            {{- end }}
+            {{- if .Values.beyla.otel.protocol }}
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: {{ .Values.beyla.otel.protocol | quote }}
+            {{- end }}
+            - name: OTEL_SERVICE_NAME
+              value: "{{ include "jawn.name" . }}"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "service.namespace={{ .Release.Namespace }},service.instance.id={{ include "jawn.name" . }}"
+            {{- range $key, $value := .Values.beyla.extraEnvVars }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: beyla-config
+              mountPath: /config
+              readOnly: true
+            - name: var-run-beyla
+              mountPath: /var/run/beyla
+          resources:
+            {{- toYaml .Values.beyla.resources | nindent 12 }}
+        {{- end }}
+      {{- if .Values.beyla.enabled }}
+      volumes:
+        - name: beyla-config
+          configMap:
+            name: {{ include "helicone.fullname" . }}-beyla-config
+        - name: var-run-beyla
+          emptyDir: {}
+      {{- end }}
+{{- end }}
