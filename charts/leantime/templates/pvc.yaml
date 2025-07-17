@@ -1,0 +1,61 @@
+{{- if .Values.persistence.userfiles.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "leantime.fullname" . }}-userfiles
+  labels:
+    {{- include "leantime.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.persistence.userfiles.storageClass | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.userfiles.size | quote }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "leantime.fullname" . }}-userfiles-private
+  labels:
+    {{- include "leantime.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.persistence.userfiles.storageClass | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.userfiles.size | quote }}
+{{- end }}
+---
+{{- if .Values.persistence.logs.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "leantime.fullname" . }}-logs
+  labels:
+    {{- include "leantime.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.persistence.logs.storageClass | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.logs.size | quote }}
+{{- end }}
+---
+{{- if .Values.persistence.plugins.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "leantime.fullname" . }}-plugins
+  labels:
+    {{- include "leantime.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.persistence.plugins.storageClass | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.plugins.size | quote }}
+{{- end }}

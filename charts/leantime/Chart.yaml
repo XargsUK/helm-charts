@@ -1,0 +1,24 @@
+apiVersion: v2
+name: leantime
+description: "Leantime - Open source project management system for creative teams"
+
+type: application
+
+version: 1.0.0
+
+appVersion: "3.1.6"
+
+# Additional metadata
+home: https://leantime.io
+sources:
+  - https://github.com/Leantime/leantime
+  - https://hub.docker.com/r/leantime/leantime
+keywords:
+  - project-management
+  - php
+  - mysql
+  - teams
+  - startup
+  - leantime
+  - agile
+  - kanban
