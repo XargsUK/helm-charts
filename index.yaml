@@ -183,6 +183,30 @@ entries:
     urls:
     - https://github.com/XargsUK/helm-charts/releases/download/helicone-core-0.1.1/helicone-core-0.1.1.tgz
     version: 0.1.1
+  leantime:
+  - apiVersion: v2
+    appVersion: 3.1.6
+    created: "2025-07-17T13:47:17.349570024Z"
+    description: Leantime - Open source project management system for creative teams
+    digest: 22648647fdf1687408baa3f114e9a0ac1a564675c3668dad3a836552b1a35fec
+    home: https://leantime.io
+    keywords:
+    - project-management
+    - php
+    - mysql
+    - teams
+    - startup
+    - leantime
+    - agile
+    - kanban
+    name: leantime
+    sources:
+    - https://github.com/Leantime/leantime
+    - https://hub.docker.com/r/leantime/leantime
+    type: application
+    urls:
+    - https://github.com/XargsUK/helm-charts/releases/download/leantime-1.0.0/leantime-1.0.0.tgz
+    version: 1.0.0
   via:
   - apiVersion: v2
     appVersion: 3.0.0
@@ -264,4 +288,4 @@ entries:
     urls:
     - via-1.0.0.tgz
     version: 1.0.0
-generated: "2025-06-13T18:05:51.398667931Z"
+generated: "2025-07-17T13:47:17.349614768Z"
