@@ -1,182 +1,99 @@
-# Leantime Helm Chart
+<div align="center">
+<img src="https://leantime.io/logos/leantime-logo-transparentBg-landscape-1500.png" alt="Leantime Logo" width="300"/><img src="https://cncf-branding.netlify.app/img/projects/helm/icon/color/helm-icon-color.svg" width=6% />
 
-Leantime is an open source project management system for creative teams, written in PHP with MySQL support. This Helm chart deploys Leantime as a web application in your Kubernetes cluster.
+Leantime is a lean open source project management system for startups and innovators. <br />It's an alternative to ClickUp, Notion, and Asana.<br />[https://leantime.io](https://leantime.io)<br /></div>
 
-## Prerequisites
+# Introduction
+This Helm Chart bootstraps a production-ready instance of Leantime in a Kubernetes cluster. To know more about Leantime and/or contribute to the development of the software, please refer to the root project [Leantime on GitHub](https://github.com/Leantime/leantime).
 
-- Kubernetes 1.16+
-- Helm 3.0+
-- MySQL 5.7+ or 8.0+ (can be provided as a dependency or external)
+# Prerequisites
+1. [x] Helm > v2 [installed](https://helm.sh/docs/using_helm/#installing-helm): `helm version`
+2. [x] Kubernetes > 1.16.x
+3. [x] Leantime Helm chart repository: `git clone https://github.com/Leantime/leantime`
 
-## Installation
-
-### Quick Start
-
-1. **Add the Helm repository:**
-
-   ```bash
-   helm repo add <repo-name> https://xargsuk.github.io/helm-charts
-   helm repo update
-   ```
-
-2. **Install Leantime:**
-   ```bash
-   helm install my-leantime <repo-name>/leantime
-   ```
-
-### Custom Values
-
-Create a `values.yaml` file to customize your deployment:
-
-```yaml
-# values.yaml
-image:
-  repository: leantime/leantime
-  tag: "3.1.6"
-
-mysql:
-  enabled: true
-  auth:
-    rootPassword: "changeme123"
-    database: "leantime"
-    username: "lean"
-    password: "changeme123"
-
-ingress:
-  enabled: true
-  hosts:
-    - host: leantime.yourdomain.com
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    - secretName: leantime-tls
-      hosts:
-        - leantime.yourdomain.com
-
-persistence:
-  enabled: true
-  size: 10Gi
-
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 250m
-    memory: 256Mi
-```
-
-Install with custom values:
-
+# Deploying Leantime
+To deploy Leantime clone this repository:
 ```bash
-helm install my-leantime <repo-name>/leantime -f values.yaml
+git clone https://github.com/Leantime/leantime
 ```
-
-## Configuration
-
-| Parameter             | Description                        | Default             |
-| --------------------- | ---------------------------------- | ------------------- |
-| `image.repository`    | Leantime image repository          | `leantime/leantime` |
-| `image.tag`           | Leantime image tag                 | `3.1.6`             |
-| `image.pullPolicy`    | Image pull policy                  | `IfNotPresent`      |
-| `replicaCount`        | Number of replicas                 | `1`                 |
-| `service.type`        | Kubernetes service type            | `ClusterIP`         |
-| `service.port`        | Service port                       | `80`                |
-| `ingress.enabled`     | Enable ingress controller resource | `false`             |
-| `mysql.enabled`       | Deploy MySQL as dependency         | `true`              |
-| `persistence.enabled` | Enable persistent storage          | `true`              |
-| `persistence.size`    | Storage size                       | `10Gi`              |
-
-## Usage
-
-### Accessing Leantime
-
-After installation, you can access Leantime using one of these methods:
-
-#### 1. Port Forward (for testing)
-
+Prepare chart dependencies:
 ```bash
-kubectl port-forward service/my-leantime 8080:80
+helm dependency build ./leantime/helm
+```
+Create a `values.yaml` file to override the default configurations. For convenience you can copy the default file in the `leantime/helm` directory into your current directory and modify it according to your needs (see configuring section). Then, deploy the application:
+```bash
+helm install leantime -f values.yaml ./leantime/helm
 ```
 
-Then open http://localhost:8080
+# Configuring
 
-#### 2. Ingress (recommended for production)
-
-Configure the ingress in your values.yaml and access via your domain.
-
-#### 3. LoadBalancer/NodePort
-
-Set `service.type` to `LoadBalancer` or `NodePort` in your values.
-
-### Initial Setup
-
-1. **First login:** Use the default admin credentials (check documentation)
-2. **Database setup:** If using external MySQL, configure connection details
-3. **Configure settings:** Set up your organization details and preferences
-4. **Create projects:** Start creating projects and invite team members
-
-## Features
-
-Leantime provides:
-
-- Project management with Kanban boards
-- Time tracking and reporting
-- Team collaboration tools
-- Milestone and goal tracking
-- File management
-- User and role management
-
-## Storage
-
-The chart supports persistent storage for:
-
-- User uploaded files (`/var/www/html/userfiles`)
-- Public files and logos (`/var/www/html/public/userfiles`)
-- Application logs (`/var/www/html/storage/logs`)
-- Plugin directory (`/var/www/html/app/Plugins`)
-
-## Security
-
-The chart includes several security best practices:
-
-- Non-root container execution
-- Configurable security contexts
-- Support for Kubernetes secrets
-- Network policies (when enabled)
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Database connection errors:**
-
-   - Verify MySQL is running and accessible
-   - Check database credentials in configuration
-   - Ensure network connectivity between pods
-
-2. **Permission issues:**
-
-   - Check persistent volume permissions
-   - Verify security context settings
-   - Ensure proper file ownership
-
-3. **Pod not starting:**
-   - Check pod logs: `kubectl logs deployment/my-leantime`
-   - Verify resource limits are appropriate
-   - Check image pull policies and availability
-
-### Getting Help
-
-- [Leantime Documentation](https://docs.leantime.io)
-- [GitHub Issues](https://github.com/Leantime/leantime/issues)
-- [Discord Community](https://discord.gg/4zMzJtAq9z)
-
-## License
-
-This chart is released under the same license as Leantime (AGPL-3.0). See the [LICENSE](https://github.com/Leantime/leantime/blob/main/LICENSE) file for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| app.defaultTimezone | string | `"America/Los_Angeles"` | Sets the default Timezone |
+| app.email.enabled | bool | `false` | Set to true if you want to use SMTP. If set to false, the default php mail() function will be used |
+| app.email.return | string | `"leantime@cluster.local"` | Sets the email address to use for notifications and registrations |
+| app.email.smtp.autoTLS | bool | `true` | Set autoTLS? |
+| app.email.smtp.hosts | string | `""` | SMTP host |
+| app.email.smtp.password | string | `""` | SMTP password |
+| app.email.smtp.port | int | `587` | SMTP port |
+| app.email.smtp.secure | string | `"STARTLS"` | Sets the SMTP security protocol (usually one of: TLS, SSL, STARTTLS) |
+| app.email.smtp.username | string | `""` | SMTP username |
+| app.language | string | `"en-US"` | Sets application language |
+| app.ldap.DN | string | `""` | Location of users, example: CN=users,DC=example,DC=com |
+| app.ldap.baseDN | string | `""` | Base DN, example: DC=example,DC=com |
+| app.ldap.defaultRoleKey | string | `""` | Sets the default role for users when they are first created |
+| app.ldap.enabled | bool | `false` | Set to true if you want to use LDAP |
+| app.ldap.groupAssignment | string | `""` | Default role assignments upon first login |
+| app.ldap.host | string | `""` | FQDN |
+| app.ldap.keys | string | `""` | Default ldap keys in your directory |
+| app.ldap.port | int | `389` | Sets LDAP port |
+| app.ldap.type | string | `""` | Select the correct directory type. Currently Supported: OL - OpenLdap, AD - Active Directory |
+| app.ldap.userDomain | string | `""` | Domain after ldap, example @example.com |
+| app.s3.bucket | string | `""` | S3 bucket |
+| app.s3.enabled | bool | `false` | Set to true if you want to use S3 instead of local files |
+| app.s3.enpoint | string | `""` | S3 endpoint |
+| app.s3.folderName | string | `""` | Sets the foldername within S3 (can be empty) |
+| app.s3.key | string | `""` | S3 key |
+| app.s3.region | string | `""` | S3 region |
+| app.s3.secret | string | `""` | S3 secret |
+| app.s3.usePathStyleEndpoint | string | `"false"` | Sets wether or not use path-style endpoint |
+| app.session.expiration | int | `28800` | Session expiration |
+| app.session.password | string | `"changeme"` | Salting sessions. Replace with a strong password |
+| app.sitename | string | `"Leantime"` | Sets the name for the instance |
+| autoscaling.enabled | bool | `false` |  |
+| autoscaling.maxReplicas | int | `100` |  |
+| autoscaling.minReplicas | int | `1` |  |
+| autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
+| fullnameOverride | string | `""` | Ovverrides the fullname of the kubernetes object names for this release |
+| image.pullPolicy | string | `"IfNotPresent"` | The pull policy of the Leantime OCI image applied to the deployment |
+| image.repository | string | `"leantime/leantime"` | OCI image repository of the Leantime application |
+| image.tag | string | `"latest"` | Overrides the image tag whose default is the chart appVersion |
+| imagePullSecrets | list | `[]` | The pull secrets to be used if you want to use a Leantime application image hosted in a private registry |
+| ingress.annotations | object | `{}` |  |
+| ingress.className | string | `""` |  |
+| ingress.enabled | bool | `false` |  |
+| ingress.hosts[0].host | string | `"chart-example.local"` |  |
+| ingress.hosts[0].paths[0].path | string | `"/"` |  |
+| ingress.hosts[0].paths[0].pathType | string | `"ImplementationSpecific"` |  |
+| ingress.tls | list | `[]` |  |
+| mariadb.auth.database | string | `"leantime"` | Database name |
+| mariadb.auth.password | string | `"changeme"` | Database password |
+| mariadb.auth.rootPassword | string | `"changeme"` | Database root password |
+| mariadb.auth.username | string | `"leantime"` | Database username |
+| mariadb.enabled | bool | `true` |  |
+| nameOverride | string | `""` | Overrides the name of the chart |
+| nodeSelector | object | `{}` |  |
+| persistence.enabled | bool | `true` | Enables or disables the persistence |
+| persistence.size | string | `"5Gi"` | Sets the size of the PVs for Leantime's public and private userfiles |
+| persistence.storageClass | string | `"standard"` | Sets the storage class for Leantime's volumes |
+| podAnnotations | object | `{}` |  |
+| podSecurityContext | object | `{}` |  |
+| replicaCount | int | `1` |  |
+| resources | object | `{}` |  |
+| securityContext | object | `{}` |  |
+| service.port | int | `80` |  |
+| service.type | string | `"ClusterIP"` |  |
+| serviceAccount.annotations | object | `{}` |  |
+| serviceAccount.create | bool | `false` |  |
+| serviceAccount.name | string | `""` |  |
+| tolerations | list | `[]` |  |

@@ -18,10 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "leantime.labels" . | nindent 8 }}
-        {{- with .Values.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        {{- include "leantime.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -30,177 +27,117 @@ spec:
       serviceAccountName: {{ include "leantime.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- if .Values.database.waitForDatabase }}
-      initContainers:
-        - name: wait-for-database
-          image: mysql:8.0
-          command:
-            - sh
-            - -c
-            - |
-              echo "Waiting for MySQL database to be ready..."
-              until mysqladmin ping -h"${DB_HOST}" -P"${DB_PORT}" -u"${DB_USER}" -p"${DB_PASSWORD}" --silent; do
-                echo "Database is not ready yet. Waiting..."
-                sleep 5
-              done
-              echo "Database is ready!"
-          env:
-            - name: DB_HOST
-              value: {{ .Values.database.host | quote }}
-            - name: DB_PORT
-              value: {{ .Values.database.port | quote }}
-            - name: DB_USER
-              value: {{ .Values.database.username | quote }}
-            - name: DB_PASSWORD
-              {{- if .Values.database.existingSecret }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.database.existingSecret }}
-                  key: {{ .Values.database.existingSecretPasswordKey | default "password" }}
-              {{- else }}
-              value: {{ .Values.database.password | quote }}
-              {{- end }}
-      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+          - name: pubuserfiles
+            mountPath: "/var/www/html/public/userfiles"
+          - name: userfiles
+            mountPath: "/var/www/html/userfiles"
+          env:
+          - name: LEAN_DB_HOST
+            value: {{ .Release.Name }}-mariadb
+          - name: LEAN_SESSION_SECURE
+            value: "{{ .Values.app.leanSessionSecure }}"
+          - name: LEAN_DB_USER
+            value: {{ .Values.mariadb.auth.username }}
+          - name: LEAN_DB_PASSWORD
+            value: {{ .Values.mariadb.auth.password }}
+          - name: LEAN_DB_DATABASE
+            value: {{ .Values.mariadb.auth.database }}
+          - name: LEAN_SITENAME
+            value: {{ .Values.app.sitename }}
+          - name: LEAN_LANGUAGE
+            value: {{ .Values.app.language }}
+          - name: LEAN_DEFAULT_TIMEZONE
+            value: {{ .Values.app.defaultTimezone }}
+          {{- if .Values.app.s3.enabled }}
+          - name: LEAN_USE_S3
+            value: {{ .Values.app.s3.enabled }}
+          - name: LEAN_S3_END_POINT
+            value: {{ .Values.app.s3.endpoint }}
+          - name: LEAN_S3_KEY
+            value: {{ .Values.app.s3.key }}
+          - name: LEAN_S3_SECRET
+            value: {{ .Values.app.s3.secret }}
+          - name: LEAN_S3_BUCKET
+            value: {{ .Values.app.s3.bucket }}
+          - name: LEAN_S3_USE_PATH_STYLE_ENDPOINT
+            value: {{ .Values.app.s3.usePathStyleEndpoint }}
+          - name: LEAN_S3_REGION
+            value: {{ .Values.app.s3.region }}
+          - name: LEAN_S3_FOLDER_NAME
+            value: {{ .Values.app.s3.folderName }}
+          {{- end }}
+          - name: LEAN_SESSION_PASSWORD
+            value: {{ .Values.app.session.password }}
+          - name: LEAN_SESSION_EXPIRATION
+            value: {{ .Values.app.session.expiration | quote }}
+          {{- if .Values.app.email.enabled }}
+          - name: LEAN_EMAIL_USE_SMTP
+            value: {{ .Values.app.email.enabled | quote }}
+          - name: LEAN_EMAIL_RETURN
+            value: {{ .Values.app.email.return }}
+          - name: LEAN_EMAIL_SMTP_HOSTS
+            value: {{ .Values.app.email.smtp.hosts }}
+          - name: LEAN_EMAIL_SMTP_USERNAME
+            value: {{ .Values.app.email.smtp.username }}
+          - name: LEAN_EMAIL_SMTP_PASSWORD
+            value: {{ .Values.app.email.smtp.password }}
+          - name: LEAN_EMAIL_SMTP_AUTO_TLS
+            value: {{ .Values.app.email.smtp.autoTLS | quote }}
+          - name: LEAN_EMAIL_SMTP_SECURE
+            value: {{ .Values.app.email.smtp.secure }}
+          - name: LEAN_EMAIL_SMTP_PORT
+            value: {{ .Values.app.email.smtp.port | quote }}
+          {{- end }}
+          {{- if .Values.app.ldap.enabled }}
+          - name: LEAN_LDAP_USE_LDAP
+            value: {{ .Values.app.ldap.enabled | quote }}
+          - name: LEAN_LDAP_LDAP_TYPE
+            value: {{ .Values.app.ldap.type }}
+          - name: LEAN_LDAP_HOST
+            value: {{ .Values.app.ldap.host }}
+          - name: LEAN_LDAP_PORT
+            value: {{ .Values.app.ldap.port | quote }}
+          - name: LEAN_LDAP_BASE_DN
+            value: {{ .Values.app.ldap.baseDN }}
+          - name: LEAN_LDAP_DN
+            value: {{ .Values.app.ldap.DN }}
+          - name: LEAN_LDAP_USER_DOMAIN
+            value: {{ .Values.app.ldap.userDomain }}
+          - name: LEAN_LDAP_KEYS
+            value: {{ .Values.app.ldap.keys }}
+          - name: LEAN_LDAP_GROUP_ASSIGNMENT
+            value: {{ .Values.app.ldap.groupAssignment }}
+          - name: LEAN_LDAP_DEFAULT_ROLE_KEY
+            value: {{ .Values.app.ldap.defaultRoleKey }}
+          {{- end }}
           ports:
             - name: http
               containerPort: 8080
               protocol: TCP
-          env:
-            # Database configuration
-            - name: LEAN_DB_HOST
-              value: {{ .Values.database.host | quote }}
-            - name: LEAN_DB_USER
-              value: {{ .Values.database.username | quote }}
-            - name: LEAN_DB_PASSWORD
-              {{- if .Values.database.existingSecret }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.database.existingSecret }}
-                  key: {{ .Values.database.existingSecretPasswordKey | default "password" }}
-              {{- else }}
-              value: {{ .Values.database.password | quote }}
-              {{- end }}
-            - name: LEAN_DB_DATABASE
-              value: {{ .Values.database.name | quote }}
-            - name: LEAN_DB_PORT
-              value: {{ .Values.database.port | quote }}
-            
-            # Application configuration
-            - name: LEAN_APP_URL
-              value: {{ .Values.leantime.appUrl | quote }}
-            - name: LEAN_APP_DIR
-              value: "/var/www/html"
-            - name: LEAN_SESSION_PASSWORD
-              {{- if .Values.leantime.sessionSecret.existingSecret }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.leantime.sessionSecret.existingSecret }}
-                  key: {{ .Values.leantime.sessionSecret.existingSecretKey | default "session-password" }}
-              {{- else }}
-              value: {{ .Values.leantime.sessionSecret.password | quote }}
-              {{- end }}
-            
-            # Email configuration
-            {{- if .Values.leantime.email.enabled }}
-            - name: LEAN_EMAIL_RETURN
-              value: {{ .Values.leantime.email.fromAddress | quote }}
-            - name: LEAN_EMAIL_USE_SMTP
-              value: "true"
-            - name: LEAN_EMAIL_SMTP_HOSTS
-              value: {{ .Values.leantime.email.smtp.host | quote }}
-            - name: LEAN_EMAIL_SMTP_AUTH
-              value: {{ .Values.leantime.email.smtp.auth | quote }}
-            - name: LEAN_EMAIL_SMTP_USERNAME
-              value: {{ .Values.leantime.email.smtp.username | quote }}
-            - name: LEAN_EMAIL_SMTP_PASSWORD
-              {{- if .Values.leantime.email.smtp.existingSecret }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.leantime.email.smtp.existingSecret }}
-                  key: {{ .Values.leantime.email.smtp.existingSecretPasswordKey | default "smtp-password" }}
-              {{- else }}
-              value: {{ .Values.leantime.email.smtp.password | quote }}
-              {{- end }}
-            - name: LEAN_EMAIL_SMTP_SECURE
-              value: {{ .Values.leantime.email.smtp.secure | quote }}
-            - name: LEAN_EMAIL_SMTP_PORT
-              value: {{ .Values.leantime.email.smtp.port | quote }}
-            {{- end }}
-            
-            # Additional environment variables
-            {{- with .Values.leantime.extraEnvVars }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
-          
           livenessProbe:
             httpGet:
-              path: /install/
+              path: /
               port: http
-            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
-            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
-            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
-          
           readinessProbe:
             httpGet:
-              path: /install/
+              path: /
               port: http
-            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
-            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
-            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
-          
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          
-          volumeMounts:
-            {{- if .Values.persistence.userfiles.enabled }}
-            - name: userfiles-storage
-              mountPath: /var/www/html/public/userfiles
-            - name: userfiles-private-storage
-              mountPath: /var/www/html/userfiles
-            {{- end }}
-            {{- if .Values.persistence.logs.enabled }}
-            - name: logs-storage
-              mountPath: /var/www/html/storage/logs
-            {{- end }}
-            {{- if .Values.persistence.plugins.enabled }}
-            - name: plugins-storage
-              mountPath: /var/www/html/app/Plugins
-            {{- end }}
-            {{- with .Values.extraVolumeMounts }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
-      
       volumes:
-        {{- if .Values.persistence.userfiles.enabled }}
-        - name: userfiles-storage
-          persistentVolumeClaim:
-            claimName: {{ include "leantime.fullname" . }}-userfiles
-        - name: userfiles-private-storage
-          persistentVolumeClaim:
-            claimName: {{ include "leantime.fullname" . }}-userfiles-private
-        {{- end }}
-        {{- if .Values.persistence.logs.enabled }}
-        - name: logs-storage
-          persistentVolumeClaim:
-            claimName: {{ include "leantime.fullname" . }}-logs
-        {{- end }}
-        {{- if .Values.persistence.plugins.enabled }}
-        - name: plugins-storage
-          persistentVolumeClaim:
-            claimName: {{ include "leantime.fullname" . }}-plugins
-        {{- end }}
-        {{- with .Values.extraVolumes }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-      
+      - name: pubuserfiles
+        persistentVolumeClaim:
+          claimName: {{ include "leantime.fullname" . }}-publicuserfiles
+      - name: userfiles
+        persistentVolumeClaim:
+          claimName: {{ include "leantime.fullname" . }}-userfiles
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
