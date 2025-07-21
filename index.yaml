@@ -207,6 +207,24 @@ entries:
     urls:
     - https://github.com/XargsUK/helm-charts/releases/download/leantime-1.0.0/leantime-1.0.0.tgz
     version: 1.0.0
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-07-21T14:52:11.483918947Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - database
+      version: 11.5.3
+    description: A Leantime Helm chart for Kubernetes. Project management more capable
+      than Trello and no where near as overwhelming as Jira
+    digest: 862bb75e26e2f5af1f2926d47613e638ef0ca0d2acde6c4a4c94e880d8800674
+    name: leantime
+    type: application
+    urls:
+    - https://github.com/XargsUK/helm-charts/releases/download/leantime-0.1.0/leantime-0.1.0.tgz
+    version: 0.1.0
   via:
   - apiVersion: v2
     appVersion: 3.0.0
@@ -288,4 +306,4 @@ entries:
     urls:
     - via-1.0.0.tgz
     version: 1.0.0
-generated: "2025-07-17T13:47:17.349614768Z"
+generated: "2025-07-21T14:52:11.483948172Z"
