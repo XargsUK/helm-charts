@@ -225,6 +225,48 @@ entries:
     urls:
     - https://github.com/XargsUK/helm-charts/releases/download/leantime-0.1.0/leantime-0.1.0.tgz
     version: 0.1.0
+  librechat:
+  - apiVersion: v2
+    appVersion: v0.7.9-rc1
+    created: "2025-07-23T22:01:05.665272649Z"
+    dependencies:
+    - condition: mongodb.enabled
+      name: mongodb
+      repository: https://charts.bitnami.com/bitnami
+      version: 16.3.0
+    - condition: meilisearch.enabled
+      name: meilisearch
+      repository: https://meilisearch.github.io/meilisearch-kubernetes
+      version: 0.11.0
+    - condition: librechat-rag-api.enabled
+      name: librechat-rag-api
+      repository: file://../librechat-rag-api
+      version: 0.5.2
+    description: A Helm chart for LibreChat
+    digest: 5ba9503dc7242a55d69d3f731d53bee3bd8d05b708aaaf519d0cc6629de6684a
+    home: https://www.librechat.ai
+    name: librechat
+    type: application
+    urls:
+    - https://github.com/XargsUK/helm-charts/releases/download/librechat-1.8.9/librechat-1.8.9.tgz
+    version: 1.8.9
+  librechat-rag-api:
+  - apiVersion: v2
+    appVersion: v0.4.0
+    created: "2025-07-23T22:01:05.852877663Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 15.5.38
+    description: A Helm chart for LibreChat
+    digest: 5e395b0e48a3052651bb7912e80c92c145bbfff17a83e445f69ecb719f7d907e
+    home: https://www.librechat.ai
+    name: librechat-rag-api
+    type: application
+    urls:
+    - https://github.com/XargsUK/helm-charts/releases/download/librechat-rag-api-0.5.2/librechat-rag-api-0.5.2.tgz
+    version: 0.5.2
   via:
   - apiVersion: v2
     appVersion: 3.0.0
@@ -306,4 +348,4 @@ entries:
     urls:
     - via-1.0.0.tgz
     version: 1.0.0
-generated: "2025-07-21T14:52:11.483948172Z"
+generated: "2025-07-23T22:01:05.852909292Z"
