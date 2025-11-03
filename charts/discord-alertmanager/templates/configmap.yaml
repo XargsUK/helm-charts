@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "discord-alertmanager.fullname" . }}
+  labels:
+    {{- include "discord-alertmanager.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    discord:
+      bot_token: ${DISCORD_BOT_TOKEN}
+      default_channel_id: {{ .Values.config.discord.defaultChannelId | quote }}
+      {{- if .Values.config.discord.routes }}
+      routes:
+      {{- toYaml .Values.config.discord.routes | nindent 6 }}
+      {{- else }}
+      routes: []
+      {{- end }}
+
+    alertmanager:
+      url: {{ .Values.config.alertmanager.url | quote }}
+      {{- if .Values.config.alertmanager.username }}
+      username: ${ALERTMANAGER_USER}
+      password: ${ALERTMANAGER_PASSWORD}
+      {{- end }}
+
+    {{- if .Values.config.grafana.url }}
+    grafana:
+      url: {{ .Values.config.grafana.url | quote }}
+    {{- end }}
+
+    database_path: {{ .Values.config.databasePath | quote }}

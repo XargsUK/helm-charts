@@ -1,0 +1,19 @@
+apiVersion: v2
+name: discord-alertmanager
+description: Bridge between Prometheus Alertmanager and Discord with interactive buttons
+
+type: application
+
+version: 1.0.0
+
+appVersion: "0.1.0"
+
+home: https://github.com/XargsUK/discord-alertmanager
+sources:
+  - https://github.com/XargsUK/discord-alertmanager
+keywords:
+  - alertmanager
+  - discord
+  - monitoring
+  - notifications
+  - prometheus

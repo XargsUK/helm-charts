@@ -1,0 +1,39 @@
+1. Get the application URL by running these commands:
+{{- if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "discord-alertmanager.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "discord-alertmanager.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "discord-alertmanager.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  echo "Discord Alertmanager is running as a ClusterIP service."
+  echo "Webhook endpoint: http://{{ include "discord-alertmanager.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/webhook"
+  echo "Health check: http://{{ include "discord-alertmanager.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/health"
+{{- end }}
+
+2. Configure Alertmanager to send webhooks to discord-alertmanager:
+
+   Add the following receiver to your Alertmanager configuration:
+
+   receivers:
+     - name: 'discord-alertmanager'
+       webhook_configs:
+         - url: 'http://{{ include "discord-alertmanager.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/webhook'
+           send_resolved: true
+
+3. Check the logs:
+   kubectl logs -f -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "discord-alertmanager.name" . }}
+
+4. Check Discord bot status:
+   The bot should show as online in your Discord server once the pod is running.
+
+{{- if not .Values.secrets.discordBotToken }}
+WARNING: Discord bot token is not configured! Please update secrets.discordBotToken in your values.yaml
+{{- end }}
+
+{{- if not .Values.config.discord.defaultChannelId }}
+WARNING: Default Discord channel ID is not configured! Please update config.discord.defaultChannelId in your values.yaml
+{{- end }}
