@@ -1,5 +1,26 @@
 apiVersion: v1
 entries:
+  discord-alertmanager:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2025-11-03T14:49:17.308376446Z"
+    description: Bridge between Prometheus Alertmanager and Discord with interactive
+      buttons
+    digest: 2b13ea2491a364ba153fb276dbe9a216689bdceaf2842dc57bf1ebc259a4ce4a
+    home: https://github.com/XargsUK/discord-alertmanager
+    keywords:
+    - alertmanager
+    - discord
+    - monitoring
+    - notifications
+    - prometheus
+    name: discord-alertmanager
+    sources:
+    - https://github.com/XargsUK/discord-alertmanager
+    type: application
+    urls:
+    - https://github.com/XargsUK/helm-charts/releases/download/discord-alertmanager-1.0.0/discord-alertmanager-1.0.0.tgz
+    version: 1.0.0
   helicone-core:
   - apiVersion: v2
     appVersion: 2025.05.23
@@ -348,4 +369,4 @@ entries:
     urls:
     - via-1.0.0.tgz
     version: 1.0.0
-generated: "2025-07-23T22:01:05.852909292Z"
+generated: "2025-11-03T14:49:17.30840486Z"
