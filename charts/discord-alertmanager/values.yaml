@@ -105,13 +105,15 @@ config:
 
   # Alertmanager API configuration
   alertmanager:
-    url: "http://prometheus-kube-prometheus-alertmanager.monitoring.svc.cluster.local:9093"
+    url: "http://prometheus-kube-prometheus-alertmanager.monitoring.svc.cluster.local:9093"  # Internal URL for API calls
+    externalUrl: ""  # External URL for Discord button links (optional)
     username: ""  # Optional
     password: ""  # Optional
 
   # Grafana configuration (optional)
   grafana:
-    url: ""
+    url: ""  # Internal URL (optional)
+    externalUrl: ""  # External URL for Discord button links (optional)
 
   # Database path
   databasePath: "/data/alerts.db"
