@@ -1,0 +1,87 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your Spotify has been deployed successfully.
+
+1. Get the application URLs:
+
+{{- if .Values.client.ingress.enabled }}
+  Web Client:
+  {{- range $host := .Values.client.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.client.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+  {{- end }}
+{{- else if contains "NodePort" .Values.client.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "your-spotify.fullname" . }}-client)
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo "Web Client: http://$NODE_IP:$NODE_PORT"
+{{- else if contains "LoadBalancer" .Values.client.service.type }}
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+  Watch the status with: kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "your-spotify.fullname" . }}-client
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "your-spotify.fullname" . }}-client -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo "Web Client: http://$SERVICE_IP:{{ .Values.client.service.port }}"
+{{- else }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "your-spotify.name" . }}-client,app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 3000:3000
+  echo "Web Client: http://127.0.0.1:3000"
+{{- end }}
+
+{{- if .Values.server.ingress.enabled }}
+  API Server:
+  {{- range $host := .Values.server.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.server.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+  {{- end }}
+{{- else }}
+  API Server is accessible via ClusterIP at: {{ include "your-spotify.fullname" . }}-server:{{ .Values.server.service.port }}
+{{- end }}
+
+2. IMPORTANT - Spotify Application Setup:
+
+   Before you can use Your Spotify, you need to configure your Spotify Application:
+
+   a. Go to: https://developer.spotify.com/dashboard/applications
+   b. Select your application or create a new one
+   c. Click "Settings" in the top right
+   d. Add the following Redirect URI:
+      {{ .Values.config.apiEndpoint }}/oauth/spotify/callback
+   e. Save the changes
+
+3. Configuration Status:
+
+{{- if not .Values.secrets.spotifyPublic }}
+   WARNING: Spotify Public key is not set!
+   Please set secrets.spotifyPublic in your values.yaml or use an existing secret.
+{{- end }}
+{{- if not .Values.secrets.spotifySecret }}
+   WARNING: Spotify Secret key is not set!
+   Please set secrets.spotifySecret in your values.yaml or use an existing secret.
+{{- end }}
+
+{{- if .Values.mongodb.enabled }}
+   MongoDB: Deployed as part of this release
+{{- else }}
+   MongoDB: Using external instance at {{ .Values.config.mongoEndpoint }}
+{{- end }}
+
+4. Importing Historical Data:
+
+   Once logged in, you can import your Spotify history:
+   - Go to Settings in the web interface
+   - Choose between "Account data" (last year) or "Extended streaming history" (full history)
+   - Request your data from: https://www.spotify.com/account/privacy/
+   - Upload the JSON files when they arrive (5-30 days)
+
+5. Useful Commands:
+
+   View server logs:
+   kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=server
+
+   View client logs:
+   kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=client
+
+   View MongoDB logs:
+   kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=mongodb
+
+For more information, visit: {{ .Chart.Home }}

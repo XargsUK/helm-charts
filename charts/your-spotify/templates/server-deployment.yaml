@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "your-spotify.fullname" . }}-server
+  labels:
+    {{- include "your-spotify.server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.server.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "your-spotify.server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "your-spotify.server.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: server
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
+        image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.server.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        env:
+        - name: API_ENDPOINT
+          value: {{ .Values.config.apiEndpoint | quote }}
+        - name: CLIENT_ENDPOINT
+          value: {{ .Values.config.clientEndpoint | quote }}
+        - name: SPOTIFY_PUBLIC
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "your-spotify.secretName" . }}
+              key: {{ .Values.secrets.existingSecretKeys.spotifyPublic }}
+        - name: SPOTIFY_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "your-spotify.secretName" . }}
+              key: {{ .Values.secrets.existingSecretKeys.spotifySecret }}
+        - name: MONGO_ENDPOINT
+          value: {{ include "your-spotify.mongoEndpoint" . | quote }}
+        - name: TIMEZONE
+          value: {{ .Values.config.timezone | quote }}
+        - name: LOG_LEVEL
+          value: {{ .Values.config.logLevel | quote }}
+        {{- if .Values.config.cors }}
+        - name: CORS
+          value: {{ .Values.config.cors | quote }}
+        {{- end }}
+        - name: COOKIE_VALIDITY_MS
+          value: {{ .Values.config.cookieValidityMs | quote }}
+        {{- if .Values.config.maxImportCacheSize }}
+        - name: MAX_IMPORT_CACHE_SIZE
+          value: {{ .Values.config.maxImportCacheSize | quote }}
+        {{- end }}
+        - name: MONGO_NO_ADMIN_RIGHTS
+          value: {{ .Values.config.mongoNoAdminRights | quote }}
+        {{- if .Values.config.frameAncestors }}
+        - name: FRAME_ANCESTORS
+          value: {{ .Values.config.frameAncestors | quote }}
+        {{- end }}
+        {{- if .Values.config.prometheus.enabled }}
+        - name: PROMETHEUS_USERNAME
+          value: {{ .Values.config.prometheus.username | quote }}
+        - name: PROMETHEUS_PASSWORD
+          value: {{ .Values.config.prometheus.password | quote }}
+        {{- end }}
+        {{- if .Values.server.livenessProbe }}
+        livenessProbe:
+          {{- toYaml .Values.server.livenessProbe | nindent 10 }}
+        {{- end }}
+        {{- if .Values.server.readinessProbe }}
+        readinessProbe:
+          {{- toYaml .Values.server.readinessProbe | nindent 10 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.server.resources | nindent 10 }}
+      {{- with .Values.server.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,235 @@
+# Default values for your-spotify
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Server configuration
+server:
+  replicaCount: 1
+
+  image:
+    repository: yooooomi/your_spotify_server
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: your-spotify-api.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+    #  - secretName: your-spotify-api-tls
+    #    hosts:
+    #      - your-spotify-api.local
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Client configuration
+client:
+  replicaCount: 1
+
+  image:
+    repository: yooooomi/your_spotify_client
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  service:
+    type: ClusterIP
+    port: 3000
+
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: your-spotify.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+    #  - secretName: your-spotify-tls
+    #    hosts:
+    #      - your-spotify.local
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# MongoDB configuration
+mongodb:
+  enabled: true
+
+  image:
+    repository: mongo
+    tag: "6"
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 27017
+
+  persistence:
+    enabled: true
+    storageClass: ""
+    accessMode: ReadWriteOnce
+    size: 8Gi
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+  # MongoDB authentication (optional)
+  auth:
+    enabled: false
+    rootUsername: ""
+    rootPassword: ""
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Application configuration
+config:
+  # API endpoint - This MUST be included as a valid redirect URI in the Spotify dashboard
+  # Format: http://your-domain.com:8080 or https://your-domain.com/api
+  apiEndpoint: "http://localhost:8080"
+
+  # Client endpoint - The URL where the web interface is accessible
+  # Format: http://your-domain.com:3000 or https://your-domain.com
+  clientEndpoint: "http://localhost:3000"
+
+  # Timezone for statistics display
+  timezone: "Europe/Paris"
+
+  # MongoDB connection string
+  # Default connects to the included MongoDB service
+  mongoEndpoint: "mongodb://{{ include \"your-spotify.fullname\" . }}-mongodb:27017/your_spotify"
+
+  # Log level (debug, info, warn, error)
+  logLevel: "info"
+
+  # CORS origins (comma-separated list)
+  # Leave empty to default to CLIENT_ENDPOINT
+  cors: ""
+
+  # Cookie validity time (e.g., 1h, 24h, 7d)
+  cookieValidityMs: "1h"
+
+  # Maximum import cache size (leave empty for infinite)
+  maxImportCacheSize: ""
+
+  # MongoDB admin rights
+  mongoNoAdminRights: false
+
+  # Frame ancestors (comma-separated URLs, or 'i-want-a-security-vulnerability-and-want-to-allow-all-frame-ancestors' for all)
+  frameAncestors: ""
+
+  # Prometheus monitoring (optional)
+  prometheus:
+    enabled: false
+    username: ""
+    password: ""
+
+# Secrets configuration
+# These should be provided via external secrets or sealed secrets in production
+secrets:
+  # Spotify application public key (required)
+  spotifyPublic: ""
+
+  # Spotify application secret key (required)
+  spotifySecret: ""
+
+  # Existing secret name (if you want to use an existing secret instead)
+  existingSecret: ""
+  # Keys in the existing secret:
+  existingSecretKeys:
+    spotifyPublic: "SPOTIFY_PUBLIC"
+    spotifySecret: "SPOTIFY_SECRET"
+
+imagePullSecrets: []
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
