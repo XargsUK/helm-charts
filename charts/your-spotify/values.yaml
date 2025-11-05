@@ -73,6 +73,10 @@ client:
     pullPolicy: IfNotPresent
     tag: "latest"
 
+  # Command override to fix startup issue with variables.js
+  command: []
+  args: []
+
   service:
     type: ClusterIP
     port: 3000
