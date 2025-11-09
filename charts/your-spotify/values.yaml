@@ -10,7 +10,7 @@ server:
   replicaCount: 1
 
   image:
-    repository: yooooomi/your_spotify_server
+    repository: ghcr.io/xargsuk/your_spotify_server
     pullPolicy: IfNotPresent
     tag: "latest"
 
@@ -36,11 +36,11 @@ server:
 
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 1000m
+      memory: 1Gi
     requests:
-      cpu: 100m
-      memory: 256Mi
+      cpu: 200m
+      memory: 512Mi
 
   livenessProbe:
     httpGet:
@@ -69,7 +69,7 @@ client:
   replicaCount: 1
 
   image:
-    repository: yooooomi/your_spotify_client
+    repository: ghcr.io/xargsuk/your_spotify_client
     pullPolicy: IfNotPresent
     tag: "latest"
 
@@ -144,7 +144,7 @@ mongodb:
     enabled: true
     storageClass: ""
     accessMode: ReadWriteOnce
-    size: 8Gi
+    size: 10Gi
 
   resources:
     limits:
@@ -205,6 +205,13 @@ config:
     enabled: false
     username: ""
     password: ""
+
+  # Monthly aggregate caching (optional)
+  # Enables pre-calculated statistics for historical months to improve query performance
+  aggregates:
+    enabled: false
+    # Whether to enable the aggregate scheduler (runs hourly to build missing aggregates)
+    schedulerEnabled: true
 
 # Secrets configuration
 # These should be provided via external secrets or sealed secrets in production

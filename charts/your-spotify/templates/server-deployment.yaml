@@ -80,6 +80,10 @@ spec:
         - name: PROMETHEUS_PASSWORD
           value: {{ .Values.config.prometheus.password | quote }}
         {{- end }}
+        {{- if .Values.config.aggregates }}
+        - name: ENABLE_AGGREGATES
+          value: {{ .Values.config.aggregates.enabled | quote }}
+        {{- end }}
         {{- if .Values.server.livenessProbe }}
         livenessProbe:
           {{- toYaml .Values.server.livenessProbe | nindent 10 }}
