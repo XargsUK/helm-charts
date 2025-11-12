@@ -213,6 +213,20 @@ config:
     # Whether to enable the aggregate scheduler (runs hourly to build missing aggregates)
     schedulerEnabled: true
 
+  # Active playback tracking (optional)
+  # Polls Spotify API to track accurate listen times and completion percentages
+  # Requires user-read-playback-state OAuth scope
+  activeTracking:
+    enabled: true
+    # Polling interval for actively listening users (milliseconds)
+    activePollIntervalMs: 5000
+    # Polling interval for idle users (no activity for 5+ minutes)
+    idlePollIntervalMs: 60000
+    # Polling interval for sleeping users (no activity for 60+ minutes)
+    sleepPollIntervalMs: 60000
+    # Minimum listen duration to save (milliseconds) - ignores very short listens
+    minListenDurationMs: 5000
+
 # Secrets configuration
 # These should be provided via external secrets or sealed secrets in production
 secrets:

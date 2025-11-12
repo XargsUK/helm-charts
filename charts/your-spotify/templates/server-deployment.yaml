@@ -83,6 +83,30 @@ spec:
         {{- if .Values.config.aggregates }}
         - name: ENABLE_AGGREGATES
           value: {{ .Values.config.aggregates.enabled | quote }}
+        {{- if .Values.config.aggregates.schedulerEnabled }}
+        - name: AGGREGATES_SCHEDULER_ENABLED
+          value: {{ .Values.config.aggregates.schedulerEnabled | quote }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.config.activeTracking }}
+        - name: ENABLE_ACTIVE_TRACKING
+          value: {{ .Values.config.activeTracking.enabled | quote }}
+        {{- if .Values.config.activeTracking.activePollIntervalMs }}
+        - name: ACTIVE_POLL_INTERVAL_MS
+          value: {{ .Values.config.activeTracking.activePollIntervalMs | quote }}
+        {{- end }}
+        {{- if .Values.config.activeTracking.idlePollIntervalMs }}
+        - name: IDLE_POLL_INTERVAL_MS
+          value: {{ .Values.config.activeTracking.idlePollIntervalMs | quote }}
+        {{- end }}
+        {{- if .Values.config.activeTracking.sleepPollIntervalMs }}
+        - name: SLEEP_POLL_INTERVAL_MS
+          value: {{ .Values.config.activeTracking.sleepPollIntervalMs | quote }}
+        {{- end }}
+        {{- if .Values.config.activeTracking.minListenDurationMs }}
+        - name: MIN_LISTEN_DURATION_MS
+          value: {{ .Values.config.activeTracking.minListenDurationMs | quote }}
+        {{- end }}
         {{- end }}
         {{- if .Values.server.livenessProbe }}
         livenessProbe:

@@ -4,7 +4,7 @@ description: A self-hosted application that tracks what you listen and offers yo
 
 type: application
 
-version: 1.4.0
+version: 1.4.1
 
 appVersion: "1.18.0"
 

@@ -1,6 +1,6 @@
 # your-spotify
 
-![Version: 1.4.0](https://img.shields.io/badge/Version-1.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.18.0](https://img.shields.io/badge/AppVersion-1.18.0-informational?style=flat-square)
+![Version: 1.4.1](https://img.shields.io/badge/Version-1.4.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.18.0](https://img.shields.io/badge/AppVersion-1.18.0-informational?style=flat-square)
 
 A self-hosted application that tracks what you listen and offers you a dashboard to explore statistics about your Spotify usage
 
@@ -48,6 +48,11 @@ A self-hosted application that tracks what you listen and offers you a dashboard
 | client.service.port | int | `3000` |  |
 | client.service.type | string | `"ClusterIP"` |  |
 | client.tolerations | list | `[]` |  |
+| config.activeTracking.activePollIntervalMs | int | `5000` |  |
+| config.activeTracking.enabled | bool | `true` |  |
+| config.activeTracking.idlePollIntervalMs | int | `60000` |  |
+| config.activeTracking.minListenDurationMs | int | `5000` |  |
+| config.activeTracking.sleepPollIntervalMs | int | `60000` |  |
 | config.aggregates.enabled | bool | `false` |  |
 | config.aggregates.schedulerEnabled | bool | `true` |  |
 | config.apiEndpoint | string | `"http://localhost:8080"` |  |
