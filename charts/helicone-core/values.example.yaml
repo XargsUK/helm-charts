@@ -251,4 +251,4 @@ mailhog:
 
 # Beyla configuration (disabled in core, managed by infrastructure chart)
 beyla:
-  enabled: false 
+  enabled: false

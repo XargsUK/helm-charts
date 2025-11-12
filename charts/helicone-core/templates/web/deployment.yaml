@@ -128,7 +128,7 @@ spec:
             - |
               echo "Setting up database permissions for helicone_admin user..."
               export PGPASSWORD="${POSTGRES_PASSWORD}"
-              
+
               # Grant permissions to helicone_admin user
               psql -h helicone-core-postgresql -p 5432 -U postgres -d helicone -c "
                 GRANT ALL PRIVILEGES ON DATABASE helicone TO helicone_admin;
@@ -160,7 +160,7 @@ spec:
             - |
               echo "Setting up database permissions for helicone_admin user..."
               export PGPASSWORD="${POSTGRES_PASSWORD}"
-              
+
               # Grant permissions to helicone_admin user
               psql -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} -d ${DB_NAME} -c "
                 GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO helicone_admin;

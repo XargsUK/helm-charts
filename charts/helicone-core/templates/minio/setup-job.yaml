@@ -49,4 +49,4 @@ spec:
               echo "Created bucket: {{ . }}"
               {{- end }}
               echo "MinIO setup completed successfully!"
-{{- end }} 
+{{- end }}

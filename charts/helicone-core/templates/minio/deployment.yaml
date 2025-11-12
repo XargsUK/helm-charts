@@ -68,4 +68,4 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: {{ include "minio.name" . }}
-{{- end }} 
+{{- end }}

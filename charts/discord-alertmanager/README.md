@@ -1,89 +1,87 @@
-# Discord Alertmanager Helm Chart
+# discord-alertmanager
 
-Bridge between Prometheus Alertmanager and Discord with interactive buttons.
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
-## Features
+Bridge between Prometheus Alertmanager and Discord with interactive buttons
 
-- **Interactive Discord Messages**: Adds Silence, Grafana, and Alert buttons to Discord messages
-- **Message Updates**: Updates existing messages when alerts resolve instead of creating new messages
-- **Label-based Routing**: Routes alerts to different Discord channels based on Alertmanager labels
-- **Silence Integration**: Creates silences in Alertmanager directly from Discord buttons
+**Homepage:** <https://github.com/XargsUK/discord-alertmanager>
 
-## Prerequisites
+## Source Code
 
-- Kubernetes 1.19+
-- Helm 3.0+
-- Discord Bot Token
-- Alertmanager instance
-
-## Installing the Chart
-
-```bash
-helm repo add xargsuk https://xargsuk.github.io/helm-charts
-helm repo update
-
-helm install discord-alertmanager xargsuk/discord-alertmanager \
-  --namespace monitoring \
-  --set secrets.discordBotToken="YOUR_DISCORD_BOT_TOKEN" \
-  --set config.discord.defaultChannelId="YOUR_CHANNEL_ID"
-```
-
-## Configuration
-
-See [values.yaml](values.yaml) for the full list of configuration options.
-
-### Required Configuration
-
-| Parameter | Description |
-|-----------|-------------|
-| `secrets.discordBotToken` | Discord bot token (required) |
-| `config.discord.defaultChannelId` | Default Discord channel ID for alerts |
-
-### Discord Channel Routing
-
-Configure label-based routing to send alerts to different channels:
-
-```yaml
-config:
-  discord:
-    defaultChannelId: "123456789"
-    routes:
-      - name: "Critical Alerts"
-        channelId: "111111111"
-        matchers:
-          severity: critical
-      - name: "Backend Team"
-        channelId: "222222222"
-        matchers:
-          team: backend
-```
-
-### Persistence
-
-By default, a 1Gi PVC is created for the SQLite database:
-
-```yaml
-persistence:
-  enabled: true
-  storageClass: ""  # Use default storage class
-  size: 1Gi
-```
-
-## Alertmanager Configuration
-
-Configure Alertmanager to send webhooks to discord-alertmanager:
-
-```yaml
-receivers:
-  - name: 'discord-alertmanager'
-    webhook_configs:
-      - url: 'http://discord-alertmanager.monitoring.svc.cluster.local:8000/webhook'
-        send_resolved: true
-
-route:
-  receiver: 'discord-alertmanager'
-```
+* <https://github.com/XargsUK/discord-alertmanager>
 
 ## Values
 
-See [values.yaml](./values.yaml) for detailed configuration options.
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| affinity | object | `{}` |  |
+| autoscaling.enabled | bool | `false` |  |
+| autoscaling.maxReplicas | int | `3` |  |
+| autoscaling.minReplicas | int | `1` |  |
+| autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
+| config.alertmanager.externalUrl | string | `""` |  |
+| config.alertmanager.password | string | `""` |  |
+| config.alertmanager.url | string | `"http://prometheus-kube-prometheus-alertmanager.monitoring.svc.cluster.local:9093"` |  |
+| config.alertmanager.username | string | `""` |  |
+| config.databasePath | string | `"/data/alerts.db"` |  |
+| config.discord.botToken | string | `""` |  |
+| config.discord.defaultChannelId | string | `""` |  |
+| config.discord.routes | list | `[]` |  |
+| config.grafana.externalUrl | string | `""` |  |
+| config.grafana.url | string | `""` |  |
+| fullnameOverride | string | `""` |  |
+| image.pullPolicy | string | `"IfNotPresent"` |  |
+| image.repository | string | `"ghcr.io/xargsuk/discord-alertmanager"` |  |
+| image.tag | string | `"latest"` |  |
+| imagePullSecrets[0].name | string | `"ghcr-pull-secret"` |  |
+| ingress.annotations | object | `{}` |  |
+| ingress.className | string | `""` |  |
+| ingress.enabled | bool | `false` |  |
+| ingress.hosts[0].host | string | `"discord-alertmanager.local"` |  |
+| ingress.hosts[0].paths[0].path | string | `"/"` |  |
+| ingress.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
+| ingress.tls | list | `[]` |  |
+| livenessProbe.failureThreshold | int | `3` |  |
+| livenessProbe.httpGet.path | string | `"/health"` |  |
+| livenessProbe.httpGet.port | string | `"http"` |  |
+| livenessProbe.initialDelaySeconds | int | `30` |  |
+| livenessProbe.periodSeconds | int | `30` |  |
+| livenessProbe.timeoutSeconds | int | `10` |  |
+| nameOverride | string | `""` |  |
+| nodeSelector | object | `{}` |  |
+| persistence.accessMode | string | `"ReadWriteOnce"` |  |
+| persistence.enabled | bool | `true` |  |
+| persistence.mountPath | string | `"/data"` |  |
+| persistence.size | string | `"1Gi"` |  |
+| persistence.storageClass | string | `""` |  |
+| podAnnotations | object | `{}` |  |
+| podLabels | object | `{}` |  |
+| podSecurityContext.fsGroup | int | `2000` |  |
+| readinessProbe.failureThreshold | int | `3` |  |
+| readinessProbe.httpGet.path | string | `"/health"` |  |
+| readinessProbe.httpGet.port | string | `"http"` |  |
+| readinessProbe.initialDelaySeconds | int | `10` |  |
+| readinessProbe.periodSeconds | int | `10` |  |
+| readinessProbe.timeoutSeconds | int | `5` |  |
+| replicaCount | int | `1` |  |
+| resources.limits.cpu | string | `"500m"` |  |
+| resources.limits.memory | string | `"512Mi"` |  |
+| resources.requests.cpu | string | `"100m"` |  |
+| resources.requests.memory | string | `"128Mi"` |  |
+| secrets.alertmanagerPassword | string | `""` |  |
+| secrets.alertmanagerUser | string | `""` |  |
+| secrets.discordBotToken | string | `""` |  |
+| securityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| securityContext.readOnlyRootFilesystem | bool | `false` |  |
+| securityContext.runAsNonRoot | bool | `true` |  |
+| securityContext.runAsUser | int | `1000` |  |
+| service.port | int | `8000` |  |
+| service.type | string | `"ClusterIP"` |  |
+| serviceAccount.annotations | object | `{}` |  |
+| serviceAccount.automount | bool | `true` |  |
+| serviceAccount.create | bool | `true` |  |
+| serviceAccount.name | string | `""` |  |
+| tolerations | list | `[]` |  |
+
+----------------------------------------------
+Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

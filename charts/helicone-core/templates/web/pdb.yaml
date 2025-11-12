@@ -15,4 +15,4 @@ spec:
   selector:
     matchLabels:
       {{- include "helicone.web.selectorLabels" . | nindent 6 }}
-{{- end }} 
+{{- end }}

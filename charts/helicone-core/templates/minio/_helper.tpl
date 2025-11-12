@@ -8,4 +8,4 @@ Selector labels
 {{- define "minio.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "minio.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }} 
+{{- end }}

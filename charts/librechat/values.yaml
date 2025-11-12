@@ -33,7 +33,7 @@ librechat:
     # Required Values:
     # - MEILI_MASTER_KEY
   existingSecretName: "librechat-credentials-env"
-  
+
   # For adding a custom config yaml-file you can set the contents in this var. See https://www.librechat.ai/docs/configuration/librechat_yaml/example
   configYamlContent: ""
   # configYamlContent: |
@@ -53,7 +53,7 @@ librechat:
   #       openNewTab: true
 
   #   registration:
-  #     socialLogins: ["discord", "facebook", "github", "google", "openid"] 
+  #     socialLogins: ["discord", "facebook", "github", "google", "openid"]
   #   endpoints:
   #     azureOpenAI:
   #      # Endpoint-level configuration
@@ -94,7 +94,7 @@ librechat:
     enabled: true
     size: 10G
     accessModes: ReadWriteOnce
-    # storageClassName: 
+    # storageClassName:
 
 # only lite RAG is supported
 librechat-rag-api:
@@ -218,7 +218,7 @@ mongodb:
     enabled: false
   databases:
    - LibreChat
-#  persistence: 
+#  persistence:
 #    size: 8Gi
 
 
@@ -227,7 +227,7 @@ meilisearch:
   persistence:
     enabled: true
     storageClass: ""
-  image: 
+  image:
     tag: "v1.7.3"
   auth:
     # Use an existing Kubernetes secret for the MEILI_MASTER_KEY

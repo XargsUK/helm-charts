@@ -22,4 +22,4 @@ spec:
       name: console
   selector:
     {{- include "minio.selectorLabels" . | nindent 4 }}
-{{- end }} 
+{{- end }}

@@ -28,5 +28,5 @@ spec:
             - containerPort: 8025
               name: web
           resources:
-            {{- toYaml .Values.mailhog.resources | nindent 12 }} 
+            {{- toYaml .Values.mailhog.resources | nindent 12 }}
 {{- end }}

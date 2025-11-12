@@ -24,4 +24,4 @@ spec:
         {{- toYaml .Values.helicone.web.verticalPodAutoscaler.maxAllowed | nindent 8 }}
       {{- end }}
       controlledResources: ["cpu", "memory"]
-{{- end }} 
+{{- end }}

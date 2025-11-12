@@ -44,4 +44,3 @@ spec:
         - name: db
           persistentVolumeClaim:
             claimName: {{ include "clickhouse.name" . }}
-

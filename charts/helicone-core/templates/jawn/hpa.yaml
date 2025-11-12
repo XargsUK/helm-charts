@@ -42,4 +42,4 @@ spec:
       - type: Percent
         value: {{ .Values.helicone.jawn.autoscaling.behavior.scaleUp.percentPolicy | default 100 }}
         periodSeconds: {{ .Values.helicone.jawn.autoscaling.behavior.scaleUp.periodSeconds | default 15 }}
-{{- end }} 
+{{- end }}
