@@ -12,7 +12,7 @@ server:
   image:
     repository: ghcr.io/xargsuk/your_spotify_server
     pullPolicy: IfNotPresent
-    tag: "latest"
+    # tag: ""  # Defaults to Chart.appVersion if not specified
 
   service:
     type: ClusterIP
@@ -71,7 +71,7 @@ client:
   image:
     repository: ghcr.io/xargsuk/your_spotify_client
     pullPolicy: IfNotPresent
-    tag: "latest"
+    # tag: ""  # Defaults to Chart.appVersion if not specified
 
   # Command override to fix startup issue with variables.js
   command: []

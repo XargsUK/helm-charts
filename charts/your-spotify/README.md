@@ -1,6 +1,6 @@
 # your-spotify
 
-![Version: 1.3.0](https://img.shields.io/badge/Version-1.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.17.0](https://img.shields.io/badge/AppVersion-1.17.0-informational?style=flat-square)
+![Version: 1.3.1](https://img.shields.io/badge/Version-1.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.17.0](https://img.shields.io/badge/AppVersion-1.17.0-informational?style=flat-square)
 
 A self-hosted application that tracks what you listen and offers you a dashboard to explore statistics about your Spotify usage
 
@@ -20,7 +20,6 @@ A self-hosted application that tracks what you listen and offers you a dashboard
 | client.command | list | `[]` |  |
 | client.image.pullPolicy | string | `"IfNotPresent"` |  |
 | client.image.repository | string | `"ghcr.io/xargsuk/your_spotify_client"` |  |
-| client.image.tag | string | `"latest"` |  |
 | client.ingress.annotations | object | `{}` |  |
 | client.ingress.className | string | `""` |  |
 | client.ingress.enabled | bool | `false` |  |
@@ -102,7 +101,6 @@ A self-hosted application that tracks what you listen and offers you a dashboard
 | server.affinity | object | `{}` |  |
 | server.image.pullPolicy | string | `"IfNotPresent"` |  |
 | server.image.repository | string | `"ghcr.io/xargsuk/your_spotify_server"` |  |
-| server.image.tag | string | `"latest"` |  |
 | server.ingress.annotations | object | `{}` |  |
 | server.ingress.className | string | `""` |  |
 | server.ingress.enabled | bool | `false` |  |
