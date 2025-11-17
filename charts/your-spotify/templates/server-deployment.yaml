@@ -52,6 +52,26 @@ spec:
             secretKeyRef:
               name: {{ include "your-spotify.secretName" . }}
               key: {{ .Values.secrets.existingSecretKeys.spotifySecret }}
+        - name: KEYCLOAK_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "your-spotify.secretName" . }}
+              key: {{ .Values.secrets.existingSecretKeys.keycloakUrl }}
+        - name: KEYCLOAK_REALM
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "your-spotify.secretName" . }}
+              key: {{ .Values.secrets.existingSecretKeys.keycloakRealm }}
+        - name: KEYCLOAK_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "your-spotify.secretName" . }}
+              key: {{ .Values.secrets.existingSecretKeys.keycloakClientId }}
+        - name: KEYCLOAK_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "your-spotify.secretName" . }}
+              key: {{ .Values.secrets.existingSecretKeys.keycloakClientSecret }}
         - name: MONGO_ENDPOINT
           value: {{ include "your-spotify.mongoEndpoint" . | quote }}
         - name: TIMEZONE
