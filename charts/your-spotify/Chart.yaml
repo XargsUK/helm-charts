@@ -4,9 +4,9 @@ description: A self-hosted application that tracks what you listen and offers yo
 
 type: application
 
-version: 1.4.1
+version: 1.4.2
 
-appVersion: "1.18.0"
+appVersion: "1.19.0"
 
 home: https://github.com/xargsuk/your_spotify
 sources:

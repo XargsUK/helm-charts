@@ -1,6 +1,6 @@
 # your-spotify
 
-![Version: 1.4.1](https://img.shields.io/badge/Version-1.4.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.18.0](https://img.shields.io/badge/AppVersion-1.18.0-informational?style=flat-square)
+![Version: 1.4.2](https://img.shields.io/badge/Version-1.4.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.19.0](https://img.shields.io/badge/AppVersion-1.19.0-informational?style=flat-square)
 
 A self-hosted application that tracks what you listen and offers you a dashboard to explore statistics about your Spotify usage
 
@@ -95,8 +95,16 @@ A self-hosted application that tracks what you listen and offers you a dashboard
 | podLabels | object | `{}` |  |
 | podSecurityContext.fsGroup | int | `2000` |  |
 | secrets.existingSecret | string | `""` |  |
+| secrets.existingSecretKeys.keycloakClientId | string | `"KEYCLOAK_CLIENT_ID"` |  |
+| secrets.existingSecretKeys.keycloakClientSecret | string | `"KEYCLOAK_CLIENT_SECRET"` |  |
+| secrets.existingSecretKeys.keycloakRealm | string | `"KEYCLOAK_REALM"` |  |
+| secrets.existingSecretKeys.keycloakUrl | string | `"KEYCLOAK_URL"` |  |
 | secrets.existingSecretKeys.spotifyPublic | string | `"SPOTIFY_PUBLIC"` |  |
 | secrets.existingSecretKeys.spotifySecret | string | `"SPOTIFY_SECRET"` |  |
+| secrets.keycloakClientId | string | `""` |  |
+| secrets.keycloakClientSecret | string | `""` |  |
+| secrets.keycloakRealm | string | `""` |  |
+| secrets.keycloakUrl | string | `""` |  |
 | secrets.spotifyPublic | string | `""` |  |
 | secrets.spotifySecret | string | `""` |  |
 | securityContext.capabilities.drop[0] | string | `"ALL"` |  |
