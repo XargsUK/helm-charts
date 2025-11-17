@@ -372,6 +372,27 @@ entries:
   your-spotify:
   - apiVersion: v2
     appVersion: 1.19.0
+    created: "2025-11-17T14:29:02.770321671Z"
+    description: A self-hosted application that tracks what you listen and offers
+      you a dashboard to explore statistics about your Spotify usage
+    digest: 996aba9b36399df92b8c3e0e605025a78ac12c075ff126a0f8c8b4eb1e6055a7
+    home: https://github.com/xargsuk/your_spotify
+    keywords:
+    - spotify
+    - statistics
+    - music
+    - tracking
+    - dashboard
+    name: your-spotify
+    sources:
+    - https://github.com/xargsuk/your_spotify
+    - https://github.com/Yooooomi/your_spotify
+    type: application
+    urls:
+    - https://github.com/XargsUK/helm-charts/releases/download/your-spotify-1.4.3/your-spotify-1.4.3.tgz
+    version: 1.4.3
+  - apiVersion: v2
+    appVersion: 1.19.0
     created: "2025-11-17T14:13:14.533282388Z"
     description: A self-hosted application that tracks what you listen and offers
       you a dashboard to explore statistics about your Spotify usage
@@ -556,4 +577,4 @@ entries:
     urls:
     - https://github.com/XargsUK/helm-charts/releases/download/your-spotify-1.0.0/your-spotify-1.0.0.tgz
     version: 1.0.0
-generated: "2025-11-17T14:13:14.533343061Z"
+generated: "2025-11-17T14:29:02.77039582Z"
