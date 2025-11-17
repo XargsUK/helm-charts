@@ -236,12 +236,22 @@ secrets:
   # Spotify application secret key (required)
   spotifySecret: ""
 
+  # Keycloak OIDC configuration (required for authentication)
+  keycloakUrl: ""
+  keycloakRealm: ""
+  keycloakClientId: ""
+  keycloakClientSecret: ""
+
   # Existing secret name (if you want to use an existing secret instead)
   existingSecret: ""
   # Keys in the existing secret:
   existingSecretKeys:
     spotifyPublic: "SPOTIFY_PUBLIC"
     spotifySecret: "SPOTIFY_SECRET"
+    keycloakUrl: "KEYCLOAK_URL"
+    keycloakRealm: "KEYCLOAK_REALM"
+    keycloakClientId: "KEYCLOAK_CLIENT_ID"
+    keycloakClientSecret: "KEYCLOAK_CLIENT_SECRET"
 
 imagePullSecrets: []
 
