@@ -288,6 +288,29 @@ entries:
     urls:
     - https://github.com/XargsUK/helm-charts/releases/download/librechat-rag-api-0.5.2/librechat-rag-api-0.5.2.tgz
     version: 0.5.2
+  octopus-usage-exporter:
+  - apiVersion: v2
+    appVersion: 0.1.6
+    created: "2025-11-18T13:14:57.978050422Z"
+    description: Prometheus exporter for Octopus Energy metrics including consumption,
+      demand, and tariff information
+    digest: b887281fc441571fe4296067fcd686d88b370f3fd5867a29aade52b99e1a4787
+    home: https://github.com/JosephRPalmer/octopus-usage-exporter
+    keywords:
+    - prometheus
+    - monitoring
+    - octopus-energy
+    - exporter
+    - metrics
+    maintainers:
+    - name: XargsUK
+    name: octopus-usage-exporter
+    sources:
+    - https://github.com/JosephRPalmer/octopus-usage-exporter
+    type: application
+    urls:
+    - https://github.com/XargsUK/helm-charts/releases/download/octopus-usage-exporter-0.1.0/octopus-usage-exporter-0.1.0.tgz
+    version: 0.1.0
   via:
   - apiVersion: v2
     appVersion: 3.0.0
@@ -598,4 +621,4 @@ entries:
     urls:
     - https://github.com/XargsUK/helm-charts/releases/download/your-spotify-1.0.0/your-spotify-1.0.0.tgz
     version: 1.0.0
-generated: "2025-11-17T14:59:23.787866701Z"
+generated: "2025-11-18T13:14:57.978093138Z"
