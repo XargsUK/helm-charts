@@ -1,0 +1,23 @@
+1. Get the application pod name by running:
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "octopus-usage-exporter.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+
+2. View the metrics endpoint:
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 9120:{{ .Values.config.promPort }}
+
+  Then visit http://127.0.0.1:9120/metrics in your browser
+
+3. Check the logs:
+  kubectl --namespace {{ .Release.Namespace }} logs -f $POD_NAME
+
+{{- if .Values.monitoring.enabled }}
+
+4. Prometheus PodMonitor has been created. Metrics will be automatically scraped by Prometheus Operator.
+{{- end }}
+
+Configuration:
+- Account Number: {{ .Values.config.accountNumber }}
+- Scrape Interval: {{ .Values.config.interval }}s
+- Gas Metrics: {{ .Values.config.gas }}
+- Electric Metrics: {{ .Values.config.electric }}
+- Tariff Rates: {{ .Values.config.tariffRates }}
+- Tariff Remaining: {{ .Values.config.tariffRemaining }}

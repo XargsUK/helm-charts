@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "octopus-usage-exporter.fullname" . }}
+  labels:
+    {{- include "octopus-usage-exporter.labels" . | nindent 4 }}
+data:
+  ACCOUNT_NUMBER: {{ .Values.config.accountNumber | quote }}

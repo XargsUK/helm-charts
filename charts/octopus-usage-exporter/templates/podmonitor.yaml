@@ -1,0 +1,17 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "octopus-usage-exporter.fullname" . }}
+  labels:
+    {{- include "octopus-usage-exporter.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "octopus-usage-exporter.selectorLabels" . | nindent 6 }}
+  podMetricsEndpoints:
+    - port: http
+      interval: {{ .Values.monitoring.interval }}
+      scrapeTimeout: {{ .Values.monitoring.scrapeTimeout }}
+      path: /metrics
+{{- end }}

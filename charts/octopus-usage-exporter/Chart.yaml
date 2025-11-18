@@ -1,0 +1,17 @@
+apiVersion: v2
+name: octopus-usage-exporter
+description: Prometheus exporter for Octopus Energy metrics including consumption, demand, and tariff information
+type: application
+version: 0.1.0
+appVersion: "0.1.6"
+home: https://github.com/JosephRPalmer/octopus-usage-exporter
+sources:
+  - https://github.com/JosephRPalmer/octopus-usage-exporter
+keywords:
+  - prometheus
+  - monitoring
+  - octopus-energy
+  - exporter
+  - metrics
+maintainers:
+  - name: XargsUK

@@ -1,0 +1,113 @@
+# Default values for octopus-usage-exporter
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/josephrpalmer/octopus-usage-exporter
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is "latest"
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 9120
+  annotations: {}
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 128Mi
+
+livenessProbe:
+  httpGet:
+    path: /metrics
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /metrics
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Prometheus monitoring configuration
+monitoring:
+  # Enable PodMonitor for Prometheus Operator
+  enabled: true
+  # Scrape interval
+  interval: 60s
+  # Scrape timeout
+  scrapeTimeout: 30s
+
+# Octopus Energy exporter configuration
+config:
+  # Octopus Energy account number (format: A-XXXXXXXX)
+  accountNumber: ""
+  # Prometheus metrics port
+  promPort: 9120
+  # Scraping interval in seconds
+  interval: 300
+  # Enable gas metrics
+  gas: true
+  # Enable electric metrics
+  electric: true
+  # Use new metric format with labels
+  ngMetrics: true
+  # Enable tariff rate metrics
+  tariffRates: true
+  # Enable tariff remaining time metrics
+  tariffRemaining: true
+
+# Secrets configuration
+secrets:
+  # Octopus Energy API key
+  apiKey: ""
+  # Optionally use an existing secret instead of creating one
+  # If set, apiKey above will be ignored
+  existingSecret: ""
+  # Key name in the existing secret for the API key
+  existingSecretKey: "API_KEY"
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
